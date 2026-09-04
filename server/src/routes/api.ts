@@ -100,7 +100,8 @@ apiRouter.get('/rooms', async (req: Request, res: Response) => {
  */
 apiRouter.get('/teachers', async (req: Request, res: Response) => {
   try {
-    const nameFilter = (req.query.name || req.query.teacher) as string | undefined;
+    const rawFilter = req.query.name ?? req.query.teacher;
+    const nameFilter = typeof rawFilter === 'string' ? rawFilter : undefined;
     const teachers = await scheduleService.getTeachers(nameFilter);
     res.json(teachers);
   } catch (err: any) {

@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import {
   BuildingType,
@@ -28,8 +29,13 @@ export class ScheduleService {
   private refreshPromise: Promise<ParsedSchedule> | null = null;
 
   constructor(fallbackPdfPath?: string) {
-    this.fallbackPdfPath =
-      fallbackPdfPath || path.resolve(process.cwd(), '../schedule_sample.pdf');
+    if (fallbackPdfPath) {
+      this.fallbackPdfPath = fallbackPdfPath;
+    } else {
+      const parentFallback = path.resolve(process.cwd(), '../schedule_sample.pdf');
+      const cwdFallback = path.resolve(process.cwd(), 'schedule_sample.pdf');
+      this.fallbackPdfPath = fs.existsSync(parentFallback) ? parentFallback : cwdFallback;
+    }
   }
 
   public setFallbackPdfPath(customPath: string): void {
@@ -137,9 +143,9 @@ export class ScheduleService {
       roomMap.get(key)!.lessons.push(lesson);
     }
 
-    // Determine target date & time for occupancy calculation
+    // Determine target date & time for occupancy calculation (in local timezone)
     const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
     const targetDate = filter?.date?.trim() || todayStr;

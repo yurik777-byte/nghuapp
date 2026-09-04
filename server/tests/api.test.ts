@@ -224,6 +224,14 @@ describe('REST API Server & Data Aggregators', () => {
       assert.strictEqual(teachers.length, 2);
       assert.ok(teachers.every((t) => t.teacher.includes('Чирва')));
     });
+
+    it('should handle non-string or array query parameters gracefully', async () => {
+      const res = await fetch(`${baseUrl}/api/teachers?name=Чирва&name=Иванов`);
+      assert.strictEqual(res.status, 200);
+
+      const teachers = (await res.json()) as any[];
+      assert.ok(teachers.length > 5, 'Returns all teachers when query param is an array');
+    });
   });
 
   describe('POST /api/refresh', () => {
