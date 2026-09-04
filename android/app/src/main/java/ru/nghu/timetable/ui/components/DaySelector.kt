@@ -36,17 +36,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-/**
- * Data representation for a single day tab in the [DaySelector].
- */
-data class DayTabItem(
-    val date: String,             // "2026-09-04"
-    val dayOfWeekShort: String,   // "Пт"
-    val dayOfMonth: String,       // "4"
-    val isToday: Boolean,
-    val hasLessons: Boolean = true,
-    val lessonCount: Int = 0
-)
 
 /**
  * Horizontal scrolling Day Selector with "Today" indicator and Campus styling.
@@ -199,42 +188,3 @@ fun DayTabPill(
     }
 }
 
-/**
- * Builds [DayTabItem] list from domain [DaySchedule] items or dates.
- */
-fun buildDayTabs(
-    daySchedules: List<DaySchedule>,
-    todayDate: String? = null
-): List<DayTabItem> {
-    val today = todayDate ?: runCatching {
-        LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-    }.getOrDefault("")
-
-    return daySchedules.map { day ->
-        val parsedDate = runCatching {
-            LocalDate.parse(day.date)
-        }.getOrNull()
-
-        val shortDayOfWeek = parsedDate?.dayOfWeek?.getDisplayName(
-            TextStyle.SHORT,
-            Locale.forLanguageTag("ru")
-        )?.replace(".", "")?.capitalizeFirst()
-            ?: day.dayOfWeek.take(2)
-
-        val dayOfMonth = parsedDate?.dayOfMonth?.toString()
-            ?: day.date.takeLast(2).trimStart('0')
-
-        DayTabItem(
-            date = day.date,
-            dayOfWeekShort = shortDayOfWeek,
-            dayOfMonth = dayOfMonth,
-            isToday = day.date == today,
-            hasLessons = day.lessons.isNotEmpty(),
-            lessonCount = day.lessons.size
-        )
-    }
-}
-
-private fun String.capitalizeFirst(): String {
-    return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.forLanguageTag("ru")) else it.toString() }
-}
