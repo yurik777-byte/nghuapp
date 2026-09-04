@@ -86,7 +86,7 @@ dependencies {
 
     // Kotlinx Serialization & JSON Converter
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
