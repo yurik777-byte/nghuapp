@@ -47,7 +47,7 @@ fun BreakCard(
     modifier: Modifier = Modifier
 ) {
     val isDark = isSystemInDarkTheme()
-    val isCampusSwitch = previousLesson.building != nextLesson.building
+    val isCampusSwitch = isBuildingTransition(previousLesson, nextLesson)
     val durationMinutes = calculateBreakDurationMinutes(previousLesson.timeEnd, nextLesson.timeStart)
 
     Card(

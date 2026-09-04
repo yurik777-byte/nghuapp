@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -91,13 +93,15 @@ fun LessonCard(
         )
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
         ) {
             // Left Accent Color Bar corresponding to Subject Category
             Box(
                 modifier = Modifier
                     .width(6.dp)
-                    .fillMaxHeight(fraction = 1f)
+                    .fillMaxHeight()
                     .background(categoryColors.accentColor)
             )
 
@@ -333,9 +337,10 @@ fun BuildingBadge(
     buildingColors: ru.nghu.timetable.ui.theme.BuildingBadgeColors,
     modifier: Modifier = Modifier
 ) {
-    val displayText = when (building) {
-        BuildingType.SPARTAKA -> "Спартака (Спартака, 12)"
-        BuildingType.MAIN -> "Главный (Красный пр-т, 9)"
+    val displayText = if (buildingAddress.isNotBlank()) {
+        "${building.shortTitle} ($buildingAddress)"
+    } else {
+        "${building.shortTitle} (${building.address})"
     }
 
     Surface(

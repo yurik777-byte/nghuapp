@@ -191,7 +191,7 @@ fun GroupPickerBottomSheet(
                     columns = GridCells.Adaptive(minSize = 105.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 380.dp),
+                        .heightIn(max = 480.dp),
                     contentPadding = PaddingValues(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
