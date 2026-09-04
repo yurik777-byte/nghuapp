@@ -29,8 +29,11 @@ export function parseTimetablePageHtml(html: string): ScrapedTimetableLink {
     const href = $(el).attr('href') || '';
     const text = $(el).text().trim();
 
-    // Check for link pointing to timetable PDF or dl download endpoint
-    const isPdfLink = href.toLowerCase().endsWith('.pdf') || href.includes('/dl/');
+    // Check for link pointing to timetable PDF, dl download endpoint, or WordPress wpfd action
+    const isPdfLink =
+      href.toLowerCase().endsWith('.pdf') ||
+      href.includes('/dl/') ||
+      href.includes('wpfd');
     const isScheduleText = /расписание\s+занятий/i.test(text);
 
     if ((isPdfLink && isScheduleText) || (/расписание.*(\d{1,2}[.-]\d{1,2}|\d{1,2}\s+[а-я]+)/i.test(text) && isPdfLink)) {
@@ -46,7 +49,10 @@ export function parseTimetablePageHtml(html: string): ScrapedTimetableLink {
     $('a').each((_, el) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
-      if (/расписание.*(студент|занятий)/i.test(text) && (href.includes('.pdf') || href.includes('/dl/'))) {
+      if (
+        /расписание.*(студент|занятий)/i.test(text) &&
+        (href.includes('.pdf') || href.includes('/dl/') || href.includes('wpfd'))
+      ) {
         downloadUrl = href.startsWith('http') ? href : new URL(href, NGHU_TIMETABLE_PAGE_URL).href;
         title = text;
       }

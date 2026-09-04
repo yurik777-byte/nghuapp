@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { parsePdfBuffer } from '../src/parser/pdfParser.js';
+import { parsePdfBuffer, getDayOfWeekFromDate } from '../src/parser/pdfParser.js';
 import { parseTimetablePageHtml, fetchLatestSchedule } from '../src/parser/scraper.js';
 
 describe('PDF Parser & Scraper', () => {
@@ -160,12 +160,36 @@ describe('PDF Parser & Scraper', () => {
       assert.strictEqual(result.title, 'Расписание занятий на 4-5 сентября 2026');
     });
 
-    it('should support fetchLatestSchedule with local fallback', async () => {
+    it('should support WordPress wpfd download URLs', () => {
+      const wpfdHtml = `
+        <html>
+          <body>
+            <a href="https://nghu.ru/wp-admin/admin-ajax.php?action=wpfd&task=file.download&wpfd_category_id=31&wpfd_file_id=19096">
+              Расписание занятий на 4-5 сентября 2026
+            </a>
+          </body>
+        </html>
+      `;
+      const result = parseTimetablePageHtml(wpfdHtml);
+      assert.ok(result.downloadUrl?.includes('wpfd'), 'Should extract wpfd URL');
+      assert.strictEqual(result.title, 'Расписание занятий на 4-5 сентября 2026');
+    });
+
+    it('should support fetchLatestSchedule with local fallback (isolated from network)', async () => {
       const schedule = await fetchLatestSchedule({
+        timetablePageUrl: 'http://127.0.0.1:59999',
         fallbackPdfPath: samplePdfPath,
+        timeoutMs: 500,
       });
       assert.ok(schedule.groups.length === 24, 'Fallback schedule returns 24 groups');
       assert.ok(schedule.lessons.length > 100, 'Fallback schedule returns lessons');
+    });
+
+    it('should dynamically calculate day of week from date', () => {
+      assert.strictEqual(getDayOfWeekFromDate('2026-09-04'), 'Пятница');
+      assert.strictEqual(getDayOfWeekFromDate('2026-09-05'), 'Суббота');
+      assert.strictEqual(getDayOfWeekFromDate('2026-09-01'), 'Вторник');
+      assert.strictEqual(getDayOfWeekFromDate('2026-10-01'), 'Четверг');
     });
   });
 });

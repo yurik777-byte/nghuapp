@@ -46,7 +46,26 @@ const PAIR_TIMES: Record<number, { start: string; end: string }> = {
 
 const TEACHER_REGEX = /([А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.?)/u;
 const SPARTAKA_REGEX = /Спар?така,\s*12(?:\s*№\s*([0-9а-яА-Я]+))?/iu;
-const ROOM_REGEX = /(?:^|\s)(?:№\s*)?(\d{1,3}(?:-\d{1,3})?[а-яА-Я]?|УМО)(?=\s|$)/u;
+const ROOM_REGEX = /(?:^|\s)(?:№\s*)?(\d{2,3}(?:-\d{2,3})?[а-яА-Я]?|УМО)(?=\s|$)/u;
+
+const RUSSIAN_WEEKDAYS = [
+  'Воскресенье',
+  'Понедельник',
+  'Вторник',
+  'Среда',
+  'Четверг',
+  'Пятница',
+  'Суббота',
+];
+
+/**
+ * Dynamically derives Russian day of week capitalized from an ISO date string "YYYY-MM-DD"
+ */
+export function getDayOfWeekFromDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map((n) => parseInt(n, 10));
+  const date = new Date(y, m - 1, d);
+  return RUSSIAN_WEEKDAYS[date.getDay()];
+}
 
 /**
  * Normalizes and cleans multi-line/spaced text tokens
@@ -161,12 +180,28 @@ function extractTimetableMeta(items: RawItem[]): {
   for (const item of items) {
     if (/Расписание занятий/i.test(item.str)) {
       sourceFileTitle = item.str;
-      const periodMatch = item.str.match(/(\d{1,2})[/.-](\d{1,2})\.(\d{2})\.(\d{4})/);
-      if (periodMatch) {
-        const [, d1, d2, mm, yyyy] = periodMatch;
+      // Check cross-month date range: e.g. "30.09-01.10.2026"
+      const crossMonthMatch = item.str.match(/(\d{1,2})\.(\d{2})[-/](\d{1,2})\.(\d{2})\.(\d{4})/);
+      // Check same-month date range: e.g. "04/05.09.2026"
+      const sameMonthMatch = item.str.match(/(\d{1,2})[/.-](\d{1,2})\.(\d{2})\.(\d{4})/);
+      // Check single date: e.g. "04.09.2026"
+      const singleDateMatch = item.str.match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
+
+      if (crossMonthMatch) {
+        const [, d1, m1, d2, m2, yyyy] = crossMonthMatch;
+        period = `${d1}.${m1}-${d2}.${m2}.${yyyy}`;
+        day1Date = `${yyyy}-${m1.padStart(2, '0')}-${d1.padStart(2, '0')}`;
+        day2Date = `${yyyy}-${m2.padStart(2, '0')}-${d2.padStart(2, '0')}`;
+      } else if (sameMonthMatch) {
+        const [, d1, d2, mm, yyyy] = sameMonthMatch;
         period = `${d1}/${d2}.${mm}.${yyyy}`;
         day1Date = `${yyyy}-${mm.padStart(2, '0')}-${d1.padStart(2, '0')}`;
         day2Date = `${yyyy}-${mm.padStart(2, '0')}-${d2.padStart(2, '0')}`;
+      } else if (singleDateMatch) {
+        const [, d1, mm, yyyy] = singleDateMatch;
+        period = `${d1}.${mm}.${yyyy}`;
+        day1Date = `${yyyy}-${mm.padStart(2, '0')}-${d1.padStart(2, '0')}`;
+        day2Date = day1Date;
       }
     } else if (/семестр/i.test(item.str)) {
       semester = item.str;
@@ -260,25 +295,25 @@ export async function parsePdfBuffer(
     // Day definitions for standard NGHU timetable layout
     const daysConfig: DayDefinition[] = [
       {
-        dayOfWeek: 'Пятница',
+        dayOfWeek: getDayOfWeekFromDate(day1Date),
         date: day1Date,
         pairs: [
           { pairNumber: 1, minY: 491, maxY: 506, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
-          { pairNumber: 2, minY: 476, maxY: 490, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
-          { pairNumber: 3, minY: 458, maxY: 472, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
-          { pairNumber: 4, minY: 445, maxY: 457, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
-          { pairNumber: 5, minY: 430, maxY: 444, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
+          { pairNumber: 2, minY: 476, maxY: 491, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
+          { pairNumber: 3, minY: 458, maxY: 476, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
+          { pairNumber: 4, minY: 445, maxY: 458, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
+          { pairNumber: 5, minY: 430, maxY: 445, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
         ],
       },
       {
-        dayOfWeek: 'Суббота',
+        dayOfWeek: getDayOfWeekFromDate(day2Date),
         date: day2Date,
         pairs: [
           { pairNumber: 1, minY: 418, maxY: 430, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
-          { pairNumber: 2, minY: 400, maxY: 417, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
-          { pairNumber: 3, minY: 385, maxY: 398, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
-          { pairNumber: 4, minY: 370, maxY: 384, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
-          { pairNumber: 5, minY: 358, maxY: 369, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
+          { pairNumber: 2, minY: 400, maxY: 418, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
+          { pairNumber: 3, minY: 385, maxY: 400, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
+          { pairNumber: 4, minY: 370, maxY: 385, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
+          { pairNumber: 5, minY: 355, maxY: 370, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
         ],
       },
     ];
@@ -290,7 +325,7 @@ export async function parsePdfBuffer(
           .filter((it) => {
             if (it.y > 506 || it.y < 355 || it.str === 'перерыв') return false;
             if (/^\d{1,2}\.\d{2}-\d{1,2}\.\d{2}$/.test(it.str)) return false;
-            if (/пятница|суббота/i.test(it.str)) return false;
+            if (/понедельник|вторник|среда|четверг|пятница|суббота|воскресенье/i.test(it.str)) return false;
             const overlap = Math.max(
               0,
               Math.min(it.x + it.w, col.maxX) - Math.max(it.x, col.minX)
