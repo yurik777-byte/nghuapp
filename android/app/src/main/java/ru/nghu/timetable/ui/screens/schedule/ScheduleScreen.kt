@@ -51,6 +51,8 @@ import ru.nghu.timetable.ui.components.DaySelector
 import ru.nghu.timetable.ui.components.GroupPickerBottomSheet
 import ru.nghu.timetable.ui.components.LessonCard
 import ru.nghu.timetable.ui.components.LiveIndicator
+import ru.nghu.timetable.ui.components.calculateBreakDurationMinutes
+import ru.nghu.timetable.ui.components.isBuildingTransition
 
 /**
  * Main Schedule Screen displaying group timetable, horizontal day selector,
@@ -215,11 +217,14 @@ fun ScheduleScreen(
                                 // Break card between consecutive pairs
                                 if (index > 0) {
                                     val previousLesson = lessons[index - 1]
-                                    BreakCard(
-                                        previousLesson = previousLesson,
-                                        nextLesson = lesson,
-                                        modifier = Modifier.padding(vertical = 2.dp)
-                                    )
+                                    val breakDuration = calculateBreakDurationMinutes(previousLesson.timeEnd, lesson.timeStart)
+                                    if (breakDuration > 0 || isBuildingTransition(previousLesson, lesson)) {
+                                        BreakCard(
+                                            previousLesson = previousLesson,
+                                            nextLesson = lesson,
+                                            modifier = Modifier.padding(vertical = 2.dp)
+                                        )
+                                    }
                                 }
 
                                 LessonCard(

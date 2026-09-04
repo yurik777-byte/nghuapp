@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,16 +26,21 @@ class RoomsViewModel(
     private val _uiState = MutableStateFlow(RoomsUiState(isLoading = true))
     val uiState: StateFlow<RoomsUiState> = _uiState.asStateFlow()
 
+    private var roomsJob: Job? = null
+
     init {
         loadRooms()
     }
 
     /**
      * Observes classrooms from repository with offline cache support.
+     * Cancels any prior observer job before launching a new collection.
      */
     fun loadRooms() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = it.rooms.isEmpty()) }
+        roomsJob?.cancel()
+        _uiState.update { it.copy(isLoading = it.rooms.isEmpty()) }
+
+        roomsJob = viewModelScope.launch {
             repository.getAllRooms()
                 .catch { exception ->
                     _uiState.update { current ->
@@ -87,6 +93,7 @@ class RoomsViewModel(
 
     /**
      * Pull-to-refresh or explicit refresh.
+     * Triggers remote sync; Room DB reactive flow automatically emits updated data.
      */
     fun refresh() {
         viewModelScope.launch {
@@ -95,7 +102,6 @@ class RoomsViewModel(
             syncResult.fold(
                 onSuccess = {
                     _uiState.update { it.copy(isRefreshing = false, isOffline = false) }
-                    loadRooms()
                 },
                 onFailure = {
                     _uiState.update { current ->

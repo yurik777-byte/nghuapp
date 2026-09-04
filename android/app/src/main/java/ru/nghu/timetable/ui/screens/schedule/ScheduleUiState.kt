@@ -47,9 +47,13 @@ data class ScheduleUiState(
 
     /**
      * Real-time status for the live progress indicator widget.
+     * Takes optional [currentTime] and [currentDate] for testability and time-travel.
      */
-    fun resolveCurrentLiveState(currentTime: String? = null): LiveIndicatorState {
-        val today = runCatching {
+    fun resolveCurrentLiveState(
+        currentTime: String? = null,
+        currentDate: String? = null
+    ): LiveIndicatorState {
+        val today = currentDate ?: runCatching {
             LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
         }.getOrDefault("")
 
@@ -57,10 +61,19 @@ data class ScheduleUiState(
             LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
         }.getOrDefault("10:00")
 
-        return if (selectedDate.isNotBlank() && selectedDate != today) {
-            resolveLiveIndicatorState(currentDayLessons, effectiveTime)
-        } else {
-            resolveLiveIndicatorState(currentDayLessons, effectiveTime)
+        if (selectedDate.isNotBlank() && today.isNotBlank() && selectedDate != today) {
+            return if (selectedDate < today) {
+                LiveIndicatorState.DayFinished("Учебный день завершён")
+            } else {
+                val firstLesson = currentDayLessons.firstOrNull()
+                if (firstLesson != null) {
+                    LiveIndicatorState.DayUpcoming(firstLesson, 0)
+                } else {
+                    LiveIndicatorState.NoLessons("На этот день занятий нет")
+                }
+            }
         }
+
+        return resolveLiveIndicatorState(currentDayLessons, effectiveTime)
     }
 }

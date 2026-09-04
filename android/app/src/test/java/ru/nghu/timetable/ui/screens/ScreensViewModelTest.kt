@@ -97,26 +97,56 @@ class ScreensViewModelTest {
             subject = "Композиция",
             room = "301"
         )
-        val day = DaySchedule(date = "2026-09-04", dayOfWeek = "Пятница", lessons = listOf(lesson1))
+        val lessonTomorrow = createSampleLesson(
+            id = "2",
+            date = "2026-09-05",
+            day = "Суббота",
+            pair = 1,
+            timeStart = "09:00",
+            timeEnd = "10:35",
+            subject = "Скульптура",
+            room = "302"
+        )
+        val dayToday = DaySchedule(date = "2026-09-04", dayOfWeek = "Пятница", lessons = listOf(lesson1))
+        val dayTomorrow = DaySchedule(date = "2026-09-05", dayOfWeek = "Суббота", lessons = listOf(lessonTomorrow))
+        val dayEmpty = DaySchedule(date = "2026-09-06", dayOfWeek = "Воскресенье", lessons = emptyList())
 
-        val state = ScheduleUiState(
-            days = listOf(day),
+        val stateToday = ScheduleUiState(
+            days = listOf(dayToday, dayTomorrow, dayEmpty),
             selectedDate = "2026-09-04"
         )
 
-        // Before lesson starts (08:40)
-        val beforeStart = state.resolveCurrentLiveState("08:40")
+        // Today: Before lesson starts (08:40)
+        val beforeStart = stateToday.resolveCurrentLiveState("08:40", "2026-09-04")
         assertTrue(beforeStart is LiveIndicatorState.DayUpcoming)
         assertEquals(20, (beforeStart as LiveIndicatorState.DayUpcoming).minutesUntilStart)
 
-        // During lesson (09:30)
-        val duringLesson = state.resolveCurrentLiveState("09:30")
+        // Today: During lesson (09:30)
+        val duringLesson = stateToday.resolveCurrentLiveState("09:30", "2026-09-04")
         assertTrue(duringLesson is LiveIndicatorState.LessonActive)
         assertEquals("Композиция", (duringLesson as LiveIndicatorState.LessonActive).lesson.subject)
 
-        // After lesson ends (11:00)
-        val afterEnd = state.resolveCurrentLiveState("11:00")
+        // Today: After lesson ends (11:00)
+        val afterEnd = stateToday.resolveCurrentLiveState("11:00", "2026-09-04")
         assertTrue(afterEnd is LiveIndicatorState.DayFinished)
+
+        // Tomorrow (selectedDate > today): at 09:30 should NOT be LessonActive, but DayUpcoming
+        val stateTomorrow = stateToday.copy(selectedDate = "2026-09-05")
+        val tomorrowLive = stateTomorrow.resolveCurrentLiveState("09:30", "2026-09-04")
+        assertTrue(tomorrowLive is LiveIndicatorState.DayUpcoming)
+        assertEquals("Скульптура", (tomorrowLive as LiveIndicatorState.DayUpcoming).firstLesson.subject)
+        assertEquals(0, tomorrowLive.minutesUntilStart)
+
+        // Future day with no lessons (selectedDate > today): should be NoLessons
+        val stateEmpty = stateToday.copy(selectedDate = "2026-09-06")
+        val emptyLive = stateEmpty.resolveCurrentLiveState("09:30", "2026-09-04")
+        assertTrue(emptyLive is LiveIndicatorState.NoLessons)
+
+        // Yesterday (selectedDate < today): should be DayFinished
+        val stateYesterday = stateToday.copy(selectedDate = "2026-09-03")
+        val yesterdayLive = stateYesterday.resolveCurrentLiveState("09:30", "2026-09-04")
+        assertTrue(yesterdayLive is LiveIndicatorState.DayFinished)
+        assertEquals("Учебный день завершён", (yesterdayLive as LiveIndicatorState.DayFinished).message)
     }
 
     // --- Rooms State & Filtering Tests ---

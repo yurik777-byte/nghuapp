@@ -414,7 +414,11 @@ private fun UpcomingDayContent(
 
         Column {
             Text(
-                text = "До начала занятий: ${state.minutesUntilStart} мин",
+                text = if (state.minutesUntilStart > 0) {
+                    "До начала занятий: ${state.minutesUntilStart} мин"
+                } else {
+                    "Занятия начнутся в ${state.firstLesson.timeStart}"
+                },
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )

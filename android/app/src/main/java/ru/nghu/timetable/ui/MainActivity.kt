@@ -2,6 +2,7 @@ package ru.nghu.timetable.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
@@ -94,7 +95,12 @@ fun MainAppScaffold(
     modifier: Modifier = Modifier
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = MainNavTab.values()
+    val tabs = MainNavTab.entries
+
+    // Intercept system Back press on secondary tabs to navigate back to Schedule (Tab 0)
+    BackHandler(enabled = selectedTabIndex != 0) {
+        selectedTabIndex = 0
+    }
 
     // ViewModels with factory instantiation preserving state
     val scheduleViewModel: ScheduleViewModel = viewModel(
