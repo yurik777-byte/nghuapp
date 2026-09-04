@@ -1,0 +1,33 @@
+{
+  "name": "nghu-timetable-server",
+  "version": "1.0.0",
+  "description": "NGHU Timetable Scraper and REST API Server",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "keywords": [
+    "nghu",
+    "timetable",
+    "schedule",
+    "parser"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "pdfjs-dist": "^6.3.289"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
