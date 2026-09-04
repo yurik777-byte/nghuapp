@@ -21,13 +21,14 @@ import ru.nghu.timetable.domain.model.TimetableMeta
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * Repository orchestrating timetable data between local Room database and remote Retrofit API.
  * Implements an Offline-First strategy:
- * 1. Reads local Room DB for instant display.
- * 2. Syncs with backend API over network and updates Room cache.
- * 3. Provides continuous reactive flows for groups, rooms, and teachers.
+ * 1. Reads local Room DB for instant display (including empty initial state to prevent UI hang).
+ * 2. Syncs with backend API over network and updates Room cache (clearing stale cache on empty results).
+ * 3. Provides continuous reactive flows for groups, rooms, and teachers with Cyrillic-safe lookups.
  */
 class ScheduleRepository(
     private val api: ScheduleApi,
@@ -36,17 +37,17 @@ class ScheduleRepository(
 
     /**
      * Observes schedule for a specific academic group with offline-first caching.
-     * Emits locally cached [DaySchedule] immediately, then triggers remote network sync
-     * and emits updated data as soon as the cache refreshes.
+     * Emits locally cached [DaySchedule] immediately (or empty list if empty), then triggers
+     * remote network sync and updates Room cache (properly clearing old cache when sync returns 0 lessons).
      */
     fun getScheduleForGroup(group: String): Flow<Result<List<DaySchedule>>> = channelFlow {
-        // 1. Immediately emit cached data from Room DB
+        val groupLower = group.trim().lowercase(Locale.ROOT)
+
+        // 1. Immediately emit cached data from Room DB (even if empty to prevent UI hang)
         val dbJob = launch {
-            scheduleDao.getLessonsForGroup(group).collect { entities ->
-                if (entities.isNotEmpty()) {
-                    val days = groupEntitiesIntoDays(entities)
-                    send(Result.success(days))
-                }
+            scheduleDao.getLessonsForGroup(groupLower).collect { entities ->
+                val days = groupEntitiesIntoDays(entities)
+                send(Result.success(days))
             }
         }
 
@@ -58,18 +59,11 @@ class ScheduleRepository(
                     day.lessons.map { it.toEntity() }
                 }
 
-                if (remoteEntities.isNotEmpty()) {
-                    scheduleDao.replaceLessonsForGroup(group, remoteEntities)
-                } else {
-                    // Check if local cache was also empty
-                    val cached = scheduleDao.getLessonsForGroup(group).firstOrNull()
-                    if (cached.isNullOrEmpty()) {
-                        send(Result.success(emptyList()))
-                    }
-                }
+                // Replace cache with fresh data (if empty, clears stale cache and triggers Room flow)
+                scheduleDao.replaceLessonsForGroup(groupLower, remoteEntities)
             } catch (e: Exception) {
-                // Network failed: if local cache was empty, notify subscriber of failure
-                val cached = scheduleDao.getLessonsForGroup(group).firstOrNull()
+                // Network failed: if local cache is empty, notify subscriber of failure
+                val cached = scheduleDao.getLessonsForGroup(groupLower).firstOrNull()
                 if (cached.isNullOrEmpty()) {
                     send(Result.failure(e))
                 }
@@ -79,15 +73,14 @@ class ScheduleRepository(
 
     /**
      * Observes classroom occupancy and schedules across campuses with offline fallback.
+     * Emits immediately from cache (or empty list if empty), then updates from live network.
      */
     fun getAllRooms(): Flow<List<RoomItem>> = channelFlow {
         // 1. Emit computed rooms from Room DB immediately
         launch {
             scheduleDao.getAllLessons().collect { entities ->
-                if (entities.isNotEmpty()) {
-                    val localRooms = computeRoomItemsFromEntities(entities)
-                    send(localRooms)
-                }
+                val localRooms = computeRoomItemsFromEntities(entities)
+                send(localRooms)
             }
         }
 
@@ -95,26 +88,27 @@ class ScheduleRepository(
         launch {
             try {
                 val remoteRooms = api.getRooms()
-                if (remoteRooms.isNotEmpty()) {
-                    send(remoteRooms.map { it.toDomain() })
-                }
+                send(remoteRooms.map { it.toDomain() })
             } catch (_: Exception) {
-                // Offline fallback handled by local Room flow
+                // If cache was empty and network failed, ensure UI does not hang
+                val cached = scheduleDao.getAllLessons().firstOrNull()
+                if (cached.isNullOrEmpty()) {
+                    send(emptyList())
+                }
             }
         }
     }
 
     /**
      * Observes teachers, their disciplines, and timetable with offline fallback.
+     * Emits immediately from cache (or empty list if empty), then updates from live network.
      */
     fun getAllTeachers(): Flow<List<TeacherItem>> = channelFlow {
         // 1. Emit computed teachers from Room DB immediately
         launch {
             scheduleDao.getAllLessons().collect { entities ->
-                if (entities.isNotEmpty()) {
-                    val localTeachers = computeTeacherItemsFromEntities(entities)
-                    send(localTeachers)
-                }
+                val localTeachers = computeTeacherItemsFromEntities(entities)
+                send(localTeachers)
             }
         }
 
@@ -122,11 +116,13 @@ class ScheduleRepository(
         launch {
             try {
                 val remoteTeachers = api.getTeachers()
-                if (remoteTeachers.isNotEmpty()) {
-                    send(remoteTeachers.map { it.toDomain() })
-                }
+                send(remoteTeachers.map { it.toDomain() })
             } catch (_: Exception) {
-                // Offline fallback handled by local Room flow
+                // If cache was empty and network failed, ensure UI does not hang
+                val cached = scheduleDao.getAllLessons().firstOrNull()
+                if (cached.isNullOrEmpty()) {
+                    send(emptyList())
+                }
             }
         }
     }
@@ -138,17 +134,15 @@ class ScheduleRepository(
         // 1. Emit groups discovered in Room DB
         launch {
             scheduleDao.getAllGroupNames().collect { groupNames ->
-                if (groupNames.isNotEmpty()) {
-                    val localGroupItems = groupNames.map { name ->
-                        GroupItem(
-                            id = name,
-                            name = name,
-                            course = parseCourseFromName(name),
-                            department = parseDepartmentFromName(name)
-                        )
-                    }
-                    send(localGroupItems)
+                val localGroupItems = groupNames.map { name ->
+                    GroupItem(
+                        id = name,
+                        name = name,
+                        course = parseCourseFromName(name),
+                        department = parseDepartmentFromName(name)
+                    )
                 }
+                send(localGroupItems)
             }
         }
 
@@ -156,11 +150,12 @@ class ScheduleRepository(
         launch {
             try {
                 val remoteGroups = api.getGroups()
-                if (remoteGroups.isNotEmpty()) {
-                    send(remoteGroups.map { it.toDomain() })
-                }
+                send(remoteGroups.map { it.toDomain() })
             } catch (_: Exception) {
-                // Offline fallback handled by local Room flow
+                val cached = scheduleDao.getAllGroupNames().firstOrNull()
+                if (cached.isNullOrEmpty()) {
+                    send(emptyList())
+                }
             }
         }
     }
@@ -175,10 +170,11 @@ class ScheduleRepository(
     }
 
     /**
-     * Observes timetable for a specific teacher.
+     * Observes timetable for a specific teacher with Cyrillic case-insensitive match.
      */
     fun getScheduleForTeacher(teacher: String): Flow<List<DaySchedule>> {
-        return scheduleDao.getLessonsForTeacher(teacher).map { entities ->
+        val teacherLower = teacher.trim().lowercase(Locale.ROOT)
+        return scheduleDao.getLessonsForTeacher(teacherLower).map { entities ->
             groupEntitiesIntoDays(entities)
         }
     }
@@ -191,9 +187,7 @@ class ScheduleRepository(
         val allEntities = response.days.flatMap { day ->
             day.lessons.map { it.toEntity() }
         }
-        if (allEntities.isNotEmpty()) {
-            scheduleDao.replaceAllLessons(allEntities)
-        }
+        scheduleDao.replaceAllLessons(allEntities)
     }
 
     /**

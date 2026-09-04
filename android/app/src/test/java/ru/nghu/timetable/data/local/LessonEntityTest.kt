@@ -40,6 +40,8 @@ class LessonEntityTest {
         assertEquals(SubjectCategory.PAINTING_DRAWING, domain.category)
         assertEquals(BuildingType.MAIN, domain.building)
         assertEquals("Красный пр-т, 9", domain.buildingAddress)
+        assertEquals("д-11", entity.groupLower)
+        assertEquals("иванов и. и.", entity.teacherLower)
     }
 
     @Test
@@ -62,6 +64,8 @@ class LessonEntityTest {
         val entity = domain.toEntity(updatedAt = 999999L)
         assertEquals(domain.id, entity.id)
         assertEquals("Т-31", entity.groupName)
+        assertEquals("т-31", entity.groupLower)
+        assertEquals("сидоров с. с.", entity.teacherLower)
         assertEquals("spartaka", entity.building)
         assertEquals("ул. Спартака, 12", entity.buildingAddress)
         assertEquals(999999L, entity.updatedAt)
@@ -87,6 +91,8 @@ class LessonEntityTest {
         val entity = dto.toEntity(updatedAt = 55555L)
         assertEquals(dto.id, entity.id)
         assertEquals("Ж-21", entity.groupName)
+        assertEquals("ж-21", entity.groupLower)
+        assertEquals("кузнецова к. к.", entity.teacherLower)
         assertEquals("История искусств", entity.subject)
         assertEquals(55555L, entity.updatedAt)
 

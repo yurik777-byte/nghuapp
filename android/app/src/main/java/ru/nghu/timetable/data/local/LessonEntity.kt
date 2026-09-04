@@ -7,18 +7,23 @@ import androidx.room.PrimaryKey
 import ru.nghu.timetable.data.remote.dto.LessonDto
 import ru.nghu.timetable.domain.model.BuildingType
 import ru.nghu.timetable.domain.model.Lesson
+import java.util.Locale
 
 /**
  * Room database entity storing cached lessons for offline-first operation.
+ * Includes lowercase normalized fields [groupLower] and [teacherLower] for reliable
+ * Cyrillic case-insensitive searching in SQLite.
  */
 @Entity(
     tableName = "lessons",
     indices = [
         Index(value = ["groupName"]),
+        Index(value = ["groupLower"]),
         Index(value = ["date"]),
         Index(value = ["room"]),
         Index(value = ["teacher"]),
-        Index(value = ["groupName", "date"])
+        Index(value = ["teacherLower"]),
+        Index(value = ["groupLower", "date"])
     ]
 )
 data class LessonEntity(
@@ -26,6 +31,8 @@ data class LessonEntity(
     val id: String,
     @ColumnInfo(name = "groupName")
     val groupName: String,
+    @ColumnInfo(name = "groupLower")
+    val groupLower: String = groupName.lowercase(Locale.ROOT),
     val date: String,
     val dayOfWeek: String,
     val pairNumber: Int,
@@ -33,6 +40,8 @@ data class LessonEntity(
     val timeEnd: String,
     val subject: String,
     val teacher: String,
+    @ColumnInfo(name = "teacherLower")
+    val teacherLower: String = teacher.lowercase(Locale.ROOT),
     val room: String,
     val building: String,
     val buildingAddress: String,
@@ -66,6 +75,7 @@ fun Lesson.toEntity(updatedAt: Long = System.currentTimeMillis()): LessonEntity 
     return LessonEntity(
         id = id,
         groupName = group,
+        groupLower = group.lowercase(Locale.ROOT),
         date = date,
         dayOfWeek = dayOfWeek,
         pairNumber = pairNumber,
@@ -73,6 +83,7 @@ fun Lesson.toEntity(updatedAt: Long = System.currentTimeMillis()): LessonEntity 
         timeEnd = timeEnd,
         subject = subject,
         teacher = teacher,
+        teacherLower = teacher.lowercase(Locale.ROOT),
         room = room,
         building = building.serializedName,
         buildingAddress = buildingAddress,
@@ -87,6 +98,7 @@ fun LessonDto.toEntity(updatedAt: Long = System.currentTimeMillis()): LessonEnti
     return LessonEntity(
         id = id,
         groupName = group,
+        groupLower = group.lowercase(Locale.ROOT),
         date = date,
         dayOfWeek = dayOfWeek,
         pairNumber = pairNumber,
@@ -94,6 +106,7 @@ fun LessonDto.toEntity(updatedAt: Long = System.currentTimeMillis()): LessonEnti
         timeEnd = timeEnd,
         subject = subject,
         teacher = teacher,
+        teacherLower = teacher.lowercase(Locale.ROOT),
         room = room,
         building = building,
         buildingAddress = buildingAddress,

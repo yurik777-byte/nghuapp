@@ -10,21 +10,24 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Room Data Access Object for timetable lessons.
  * Provides Flow-based reactive queries and atomic cache replacement transactions.
+ * Utilizes pre-folded lowercase columns (groupLower, teacherLower) to guarantee
+ * correct Cyrillic case-insensitive filtering in standard SQLite.
  */
 @Dao
 interface ScheduleDao {
 
     /**
      * Observes all scheduled lessons for a given academic group, ordered chronologically.
+     * Uses normalized [groupLower] to avoid SQLite ASCII-only case folding issues with Cyrillic.
      */
-    @Query("SELECT * FROM lessons WHERE LOWER(groupName) = LOWER(:group) ORDER BY date ASC, pairNumber ASC")
-    fun getLessonsForGroup(group: String): Flow<List<LessonEntity>>
+    @Query("SELECT * FROM lessons WHERE groupLower = :groupLower ORDER BY date ASC, pairNumber ASC")
+    fun getLessonsForGroup(groupLower: String): Flow<List<LessonEntity>>
 
     /**
      * Observes scheduled lessons for a group on a specific date (YYYY-MM-DD).
      */
-    @Query("SELECT * FROM lessons WHERE LOWER(groupName) = LOWER(:group) AND date = :date ORDER BY pairNumber ASC")
-    fun getLessonsForGroupAndDate(group: String, date: String): Flow<List<LessonEntity>>
+    @Query("SELECT * FROM lessons WHERE groupLower = :groupLower AND date = :date ORDER BY pairNumber ASC")
+    fun getLessonsForGroupAndDate(groupLower: String, date: String): Flow<List<LessonEntity>>
 
     /**
      * Observes all lessons scheduled in a given room/classroom.
@@ -34,9 +37,10 @@ interface ScheduleDao {
 
     /**
      * Observes all lessons taught by a teacher matching query substring.
+     * Uses [teacherLower] column to ensure proper Cyrillic case-insensitive substring search.
      */
-    @Query("SELECT * FROM lessons WHERE LOWER(teacher) LIKE '%' || LOWER(:teacherQuery) || '%' ORDER BY date ASC, pairNumber ASC")
-    fun getLessonsForTeacher(teacherQuery: String): Flow<List<LessonEntity>>
+    @Query("SELECT * FROM lessons WHERE teacherLower LIKE '%' || :teacherLower || '%' ORDER BY date ASC, pairNumber ASC")
+    fun getLessonsForTeacher(teacherLower: String): Flow<List<LessonEntity>>
 
     /**
      * Observes all cached lessons in the database.
@@ -75,10 +79,10 @@ interface ScheduleDao {
     suspend fun insertLessons(lessons: List<LessonEntity>)
 
     /**
-     * Deletes cached lessons for a specific group.
+     * Deletes cached lessons for a specific group using normalized [groupLower].
      */
-    @Query("DELETE FROM lessons WHERE LOWER(groupName) = LOWER(:group)")
-    suspend fun deleteLessonsForGroup(group: String)
+    @Query("DELETE FROM lessons WHERE groupLower = :groupLower")
+    suspend fun deleteLessonsForGroup(groupLower: String)
 
     /**
      * Clears all cached lessons from the database.
@@ -90,8 +94,8 @@ interface ScheduleDao {
      * Atomically replaces cached lessons for a specific group.
      */
     @Transaction
-    suspend fun replaceLessonsForGroup(group: String, lessons: List<LessonEntity>) {
-        deleteLessonsForGroup(group)
+    suspend fun replaceLessonsForGroup(groupLower: String, lessons: List<LessonEntity>) {
+        deleteLessonsForGroup(groupLower)
         insertLessons(lessons)
     }
 
