@@ -23,7 +23,9 @@ import { GroupItem } from './types';
 import { triggerHaptic } from './utils/storage';
 
 export const App: React.FC = () => {
-  const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light');
+  const [colorScheme, setColorScheme] = useState<'light' | 'dark'>(() => {
+    return new URLSearchParams(window.location.search).get('vk_appearance') === 'dark' ? 'dark' : 'light';
+  });
   const [activeTab, setActiveTab] = useState<'schedule' | 'rooms' | 'teachers'>('schedule');
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [groups, setGroups] = useState<GroupItem[]>([]);

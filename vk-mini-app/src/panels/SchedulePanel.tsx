@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Panel, PanelHeader, PullToRefresh, Group, Spinner, Placeholder, Button, Banner } from '@vkontakte/vkui';
-import { Icon28CalendarOutline } from '@vkontakte/icons';
+import { Icon28CalendarOutline, Icon28WarningTriangleOutline } from '@vkontakte/icons';
 import { ScheduleResponse, Lesson } from '../types';
 import { fetchSchedule } from '../api/client';
 import { cacheSchedule, getCachedSchedule } from '../utils/storage';
 import { useLiveStatus } from '../hooks/useLiveStatus';
+import { getLocalDateString } from '../utils/timeUtils';
 import { DaySelector } from '../components/DaySelector';
 import { LiveWidget } from '../components/LiveWidget';
 import { LessonCard } from '../components/LessonCard';
@@ -20,11 +21,13 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ id, selectedGroup,
   const [schedule, setSchedule] = useState<ScheduleResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [hasError, setHasError] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      setHasError(false);
       const data = await fetchSchedule(selectedGroup);
       setSchedule(data);
       cacheSchedule(selectedGroup, data);
@@ -38,6 +41,9 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ id, selectedGroup,
       if (cached) {
         setSchedule(cached);
         setIsOffline(true);
+      } else {
+        setSchedule(null);
+        setHasError(true);
       }
     } finally {
       setLoading(false);
@@ -48,6 +54,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ id, selectedGroup,
     loadData();
   }, [selectedGroup]);
 
+  const isTodaySelected = selectedDate === getLocalDateString();
   const activeDay = schedule?.days.find((d) => d.date === selectedDate);
   const currentLessons: Lesson[] = useMemo(() => activeDay?.lessons || [], [activeDay]);
   const liveStatus = useLiveStatus(currentLessons);
@@ -81,14 +88,29 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ id, selectedGroup,
           />
         )}
 
-        <LiveWidget status={liveStatus} />
+        {isTodaySelected && schedule && <LiveWidget status={liveStatus} />}
 
         <Group>
           {loading && !schedule ? (
             <Spinner size="m" style={{ margin: '40px 0' }} />
+          ) : hasError && !schedule ? (
+            <Placeholder
+              icon={<Icon28WarningTriangleOutline width={48} height={48} />}
+              title="Не удалось загрузить расписание"
+              action={
+                <Button size="m" mode="primary" onClick={loadData}>
+                  Повторить попытку
+                </Button>
+              }
+            >
+              Проверьте соединение с интернетом и попробуйте снова.
+            </Placeholder>
           ) : currentLessons.length > 0 ? (
             currentLessons.map((lesson, idx) => {
-              const isCurrent = liveStatus.type === 'lesson' && liveStatus.currentLesson?.pairNumber === lesson.pairNumber;
+              const isCurrent =
+                isTodaySelected &&
+                liveStatus.type === 'lesson' &&
+                liveStatus.currentLesson?.pairNumber === lesson.pairNumber;
               const next = currentLessons[idx + 1];
               let breakMins = 0;
               if (next) {

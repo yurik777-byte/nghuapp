@@ -73,9 +73,10 @@ export function getCachedSchedule(group: string): ScheduleResponse | null {
 export function triggerHaptic(style: 'light' | 'medium' | 'heavy' = 'light'): void {
   try {
     if (vkBridge.isEmbedded()) {
-      vkBridge.send('VKWebAppTapticImpactOccurred', { style });
+      vkBridge.send('VKWebAppTapticImpactOccurred', { style }).catch(() => {});
     }
   } catch {
     // Ignore in non-VK environments
   }
 }
+

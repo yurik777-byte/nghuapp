@@ -98,4 +98,11 @@ describe('Storage & Offline Cache', () => {
     triggerHaptic('light');
     expect(sendSpy).not.toHaveBeenCalled();
   });
+
+  it('handles haptic feedback rejection gracefully', () => {
+    vi.spyOn(vkBridge, 'isEmbedded').mockReturnValue(true);
+    vi.spyOn(vkBridge, 'send').mockRejectedValue(new Error('Bridge failure'));
+
+    expect(() => triggerHaptic('light')).not.toThrow();
+  });
 });

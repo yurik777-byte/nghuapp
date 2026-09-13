@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Panel,
   PanelHeader,
@@ -12,9 +12,10 @@ import {
   Badge,
   Spinner,
   Placeholder,
+  Button,
   Accordion,
 } from '@vkontakte/vkui';
-import { Icon28DoorArrowRightOutline } from '@vkontakte/icons';
+import { Icon28DoorArrowRightOutline, Icon28WarningTriangleOutline } from '@vkontakte/icons';
 import { RoomItem } from '../types';
 import { fetchRooms } from '../api/client';
 import { triggerHaptic } from '../utils/storage';
@@ -22,15 +23,28 @@ import { triggerHaptic } from '../utils/storage';
 export const RoomsPanel: React.FC<{ id: string }> = ({ id }) => {
   const [rooms, setRooms] = useState<RoomItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [search, setSearch] = useState('');
   const [buildingFilter, setBuildingFilter] = useState<'all' | 'main' | 'spartaka'>('all');
 
-  useEffect(() => {
+  const loadRooms = useCallback(() => {
+    setLoading(true);
+    setHasError(false);
     fetchRooms()
-      .then(setRooms)
-      .catch((e) => console.error(e))
+      .then((data) => {
+        setRooms(data);
+        setHasError(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setHasError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   const filtered = rooms.filter((r) => {
     const matchesBuilding = buildingFilter === 'all' || r.building === buildingFilter;
@@ -48,60 +62,76 @@ export const RoomsPanel: React.FC<{ id: string }> = ({ id }) => {
     <Panel id={id}>
       <PanelHeader>Аудитории</PanelHeader>
       <Group>
-        <Search
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск кабинета или предмета..."
-        />
-        <HorizontalScroll>
-          <Tabs>
-            <TabsItem
-              selected={buildingFilter === 'all'}
-              onClick={() => {
-                triggerHaptic('light');
-                setBuildingFilter('all');
-              }}
-            >
-              Все корпуса
-            </TabsItem>
-            <TabsItem
-              selected={buildingFilter === 'main'}
-              onClick={() => {
-                triggerHaptic('light');
-                setBuildingFilter('main');
-              }}
-            >
-              Красный пр-т, 9
-            </TabsItem>
-            <TabsItem
-              selected={buildingFilter === 'spartaka'}
-              onClick={() => {
-                triggerHaptic('light');
-                setBuildingFilter('spartaka');
-              }}
-            >
-              ул. Спартака, 12
-            </TabsItem>
-          </Tabs>
-        </HorizontalScroll>
+        {!hasError && (
+          <>
+            <Search
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Поиск кабинета или предмета..."
+            />
+            <HorizontalScroll>
+              <Tabs>
+                <TabsItem
+                  selected={buildingFilter === 'all'}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setBuildingFilter('all');
+                  }}
+                >
+                  Все корпуса
+                </TabsItem>
+                <TabsItem
+                  selected={buildingFilter === 'main'}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setBuildingFilter('main');
+                  }}
+                >
+                  Красный пр-т, 9
+                </TabsItem>
+                <TabsItem
+                  selected={buildingFilter === 'spartaka'}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setBuildingFilter('spartaka');
+                  }}
+                >
+                  ул. Спартака, 12
+                </TabsItem>
+              </Tabs>
+            </HorizontalScroll>
 
-        <div style={{ display: 'flex', gap: 12, padding: '8px 16px' }}>
-          <Badge
-            mode="prominent"
-            style={{ backgroundColor: '#4bb34b', color: '#fff', padding: '4px 8px', borderRadius: 6 }}
-          >
-            Свободно: {freeCount}
-          </Badge>
-          <Badge
-            mode="prominent"
-            style={{ backgroundColor: '#e64646', color: '#fff', padding: '4px 8px', borderRadius: 6 }}
-          >
-            Занято: {occupiedCount}
-          </Badge>
-        </div>
+            <div style={{ display: 'flex', gap: 12, padding: '8px 16px' }}>
+              <Badge
+                mode="prominent"
+                style={{ backgroundColor: '#4bb34b', color: '#fff', padding: '4px 8px', borderRadius: 6 }}
+              >
+                Свободно: {freeCount}
+              </Badge>
+              <Badge
+                mode="prominent"
+                style={{ backgroundColor: '#e64646', color: '#fff', padding: '4px 8px', borderRadius: 6 }}
+              >
+                Занято: {occupiedCount}
+              </Badge>
+            </div>
+          </>
+        )}
 
         {loading ? (
           <Spinner size="m" style={{ margin: '40px 0' }} />
+        ) : hasError ? (
+          <Placeholder
+            icon={<Icon28WarningTriangleOutline width={48} height={48} />}
+            title="Не удалось загрузить аудитории"
+            action={
+              <Button size="m" mode="primary" onClick={loadRooms}>
+                Повторить попытку
+              </Button>
+            }
+          >
+            Проверьте соединение с интернетом и попробуйте снова.
+          </Placeholder>
         ) : filtered.length > 0 ? (
           filtered.map((room) => (
             <Accordion key={`${room.building}-${room.room}`}>

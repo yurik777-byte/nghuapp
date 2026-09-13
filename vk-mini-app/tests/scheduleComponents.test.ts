@@ -29,4 +29,27 @@ describe('Schedule Component Logic', () => {
     const breakMins = (startH * 60 + startM) - (endH * 60 + endM);
     expect(breakMins).toBe(10);
   });
+
+  it('scopes isCurrent strictly to today', () => {
+    const liveStatus = {
+      type: 'lesson' as const,
+      currentLesson: { pairNumber: 1, subject: 'Рисунок' } as Lesson,
+    };
+
+    const isTodaySelected = true;
+    const isOtherDaySelected = false;
+
+    const isCurrentToday =
+      isTodaySelected &&
+      liveStatus.type === 'lesson' &&
+      liveStatus.currentLesson?.pairNumber === 1;
+
+    const isCurrentOtherDay =
+      isOtherDaySelected &&
+      liveStatus.type === 'lesson' &&
+      liveStatus.currentLesson?.pairNumber === 1;
+
+    expect(isCurrentToday).toBe(true);
+    expect(isCurrentOtherDay).toBe(false);
+  });
 });

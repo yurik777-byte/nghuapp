@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Panel,
   PanelHeader,
@@ -8,10 +8,11 @@ import {
   Avatar,
   Spinner,
   Placeholder,
+  Button,
   Accordion,
   Footnote,
 } from '@vkontakte/vkui';
-import { Icon28Users3Outline } from '@vkontakte/icons';
+import { Icon28Users3Outline, Icon28WarningTriangleOutline } from '@vkontakte/icons';
 import { TeacherItem } from '../types';
 import { fetchTeachers } from '../api/client';
 
@@ -22,14 +23,27 @@ const InitialsAvatar: React.FC<{ size?: number; children?: string }> = ({ size =
 export const TeachersPanel: React.FC<{ id: string }> = ({ id }) => {
   const [teachers, setTeachers] = useState<TeacherItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
+  const loadTeachers = useCallback(() => {
+    setLoading(true);
+    setHasError(false);
     fetchTeachers()
-      .then(setTeachers)
-      .catch((e) => console.error(e))
+      .then((data) => {
+        setTeachers(data);
+        setHasError(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setHasError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadTeachers();
+  }, [loadTeachers]);
 
   const filtered = teachers.filter((t) => {
     const matchesName = t.name.toLowerCase().includes(search.toLowerCase());
@@ -41,14 +55,28 @@ export const TeachersPanel: React.FC<{ id: string }> = ({ id }) => {
     <Panel id={id}>
       <PanelHeader>Преподаватели</PanelHeader>
       <Group>
-        <Search
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Фамилия педагога или предмет..."
-        />
+        {!hasError && (
+          <Search
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Фамилия педагога или предмет..."
+          />
+        )}
 
         {loading ? (
           <Spinner size="m" style={{ margin: '40px 0' }} />
+        ) : hasError ? (
+          <Placeholder
+            icon={<Icon28WarningTriangleOutline width={48} height={48} />}
+            title="Не удалось загрузить преподавателей"
+            action={
+              <Button size="m" mode="primary" onClick={loadTeachers}>
+                Повторить попытку
+              </Button>
+            }
+          >
+            Проверьте соединение с интернетом и попробуйте снова.
+          </Placeholder>
         ) : filtered.length > 0 ? (
           filtered.map((t) => (
             <Accordion key={t.name}>

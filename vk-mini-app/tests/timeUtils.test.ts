@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getCurrentLessonStatus, checkBuildingTransfer, formatMinutesWord } from '../src/utils/timeUtils';
+import { getCurrentLessonStatus, checkBuildingTransfer, formatMinutesWord, getLocalDateString } from '../src/utils/timeUtils';
 import { Lesson } from '../src/types';
 
 describe('TimeUtils & LiveStatus', () => {
@@ -75,4 +75,21 @@ describe('TimeUtils & LiveStatus', () => {
     expect(checkBuildingTransfer(sampleLessons[0], sampleLessons[1])).toBe(true);
     expect(checkBuildingTransfer(sampleLessons[0], sampleLessons[0])).toBe(false);
   });
+
+  it('formats local date correctly in YYYY-MM-DD format', () => {
+    const d1 = new Date(2026, 8, 13); // month is 0-indexed, 8 = September
+    expect(getLocalDateString(d1)).toBe('2026-09-13');
+
+    const d2 = new Date(2026, 0, 5); // month 0 = January, day 5
+    expect(getLocalDateString(d2)).toBe('2026-01-05');
+
+    const d3 = new Date(2026, 11, 31); // month 11 = December, day 31
+    expect(getLocalDateString(d3)).toBe('2026-12-31');
+
+    // Default parameter test
+    const today = new Date();
+    const expected = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    expect(getLocalDateString()).toBe(expected);
+  });
 });
+

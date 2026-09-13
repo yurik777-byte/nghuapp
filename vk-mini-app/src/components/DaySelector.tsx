@@ -1,6 +1,7 @@
 import React from 'react';
 import { HorizontalScroll, Tabs, TabsItem, Badge } from '@vkontakte/vkui';
 import { triggerHaptic } from '../utils/storage';
+import { getLocalDateString } from '../utils/timeUtils';
 
 interface DaySelectorProps {
   days: { date: string; dayOfWeek: string }[];
@@ -9,7 +10,7 @@ interface DaySelectorProps {
 }
 
 export const DaySelector: React.FC<DaySelectorProps> = ({ days, selectedDate, onSelectDate }) => {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getLocalDateString();
 
   const getShortDayName = (dayName: string) => {
     const map: Record<string, string> = {
