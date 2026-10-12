@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Dome Body with sculpted negative space flame -->
+  <path d="M50 8
+           L53 16
+           C53 16 61 26 69 37
+           C78 50 81 65 79 79
+           C78 84 74 85 71 85
+           L63 85
+           C62 78 61 70 59 64
+           C60 70 58 79 55 85
+           L45 85
+           C42 79 40 70 41 64
+           C39 70 38 78 37 85
+           L29 85
+           C26 85 22 84 21 79
+           C19 65 22 50 31 37
+           C39 26 47 16 47 16
+           Z" fill="#759A7E"/>
+
+  <!-- Negative Space Flame Cutout (Transparent Void) -->
+  <path d="M50 46
+           C53.5 53 57 58 57 66
+           C57 74 53.5 81 50 86
+           C46.5 81 43 74 43 66
+           C43 58 46.5 53 50 46
+           Z" fill="#F8F9FA"/>
+
+  <!-- Terracotta Inner Flame Accent -->
+  <path d="M50 53
+           C52 58 54 62 54 68
+           C54 75 51.8 80 50 84
+           C48.2 80 46 75 46 68
+           C46 62 48 58 50 53
+           Z" fill="#C45E47"/>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Spire Finial -->
+  <circle cx="50" cy="11" r="3" fill="#759A7E"/>
+
+  <!-- Outer Dome Contour -->
+  <path d="M50 15
+           C50 20 38 30 30 43
+           C21 57 21 73 25 83
+           C25.5 84.5 27 85 29 85
+           L71 85
+           C73 85 74.5 84.5 75 83
+           C79 73 79 57 70 43
+           C62 30 50 20 50 15 Z"
+        fill="none" stroke="#759A7E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Inner Dome Arches -->
+  <path d="M37 85 C37 68 43 52 50 38 C57 52 63 68 63 85"
+        fill="none" stroke="#759A7E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Central Flame Core (Terracotta Stroke & Fill) -->
+  <path d="M50 52
+           C53 58 55.5 63 55.5 69
+           C55.5 76 53 82 50 85
+           C47 82 44.5 76 44.5 69
+           C44.5 63 47 58 50 52 Z"
+        fill="#C45E47" stroke="#C45E47" stroke-width="1.8" stroke-linejoin="round"/>
+</svg>

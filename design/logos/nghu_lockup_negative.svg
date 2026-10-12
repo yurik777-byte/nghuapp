@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Dome Silhouette -->
+  <path d="M50 5
+           L52.5 12
+           C52.5 12 60 21 68 31
+           C77 43 80 57 78 70
+           C77 75 73 76 70 76
+           L62 76
+           C61 70 60 62 58 56
+           C59 62 57 70 54 76
+           L46 76
+           C43 70 41 62 42 56
+           C40 62 39 70 38 76
+           L30 76
+           C27 76 23 75 22 70
+           C20 57 23 43 32 31
+           C40 21 47.5 12 47.5 12
+           Z" fill="#759A7E"/>
+
+  <!-- Negative Space Flame Cutout -->
+  <path d="M50 38
+           C53 45 56 50 56 57
+           C56 64 53 71 50 76
+           C47 71 44 64 44 57
+           C44 50 47 45 50 38
+           Z" fill="#F8F9FA"/>
+
+  <!-- Inner Terracotta Flame -->
+  <path d="M50 45
+           C51.8 50 53.5 54 53.5 59
+           C53.5 65 51.5 70 50 74
+           C48.5 70 46.5 65 46.5 59
+           C46.5 54 48.2 50 50 45
+           Z" fill="#C45E47"/>
+
+  <!-- Clean Modern Wordmark -->
+  <text x="50" y="93" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#2E3C32" text-anchor="middle" letter-spacing="3.5">НГХУ</text>
+</svg>
