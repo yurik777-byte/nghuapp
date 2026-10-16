@@ -202,6 +202,7 @@ data class RoomItem(
     val isOccupied: Boolean = false,
     val currentLesson: Lesson? = null,
     val nextLesson: Lesson? = null,
+    val lastLesson: Lesson? = null,
     val daySchedule: List<Lesson> = emptyList(),
     val allLessons: List<Lesson> = emptyList()
 )

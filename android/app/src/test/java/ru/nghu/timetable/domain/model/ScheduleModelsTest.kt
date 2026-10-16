@@ -2,6 +2,7 @@ package ru.nghu.timetable.domain.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -85,6 +86,41 @@ class ScheduleModelsTest {
         assertEquals(LessonStatus.FINISHED, lessonMain.getStatus(currentDate = "2026-09-04", currentTime = "11:00"))
         assertEquals(LessonStatus.FINISHED, lessonMain.getStatus(currentDate = "2026-09-05", currentTime = "08:00"))
         assertEquals(LessonStatus.UPCOMING, lessonMain.getStatus(currentDate = "2026-09-03", currentTime = "12:00"))
+    }
+
+    @Test
+    fun testRoomItemLastLessonProperty() {
+        val lastLesson = Lesson(
+            id = "last_1",
+            group = "Д-11",
+            date = "2026-10-12",
+            dayOfWeek = "Понедельник",
+            pairNumber = 1,
+            timeStart = "09:00",
+            timeEnd = "10:35",
+            subject = "Живопись",
+            teacher = "Чирва Д.В.",
+            room = "101",
+            building = BuildingType.MAIN,
+            buildingAddress = BuildingType.MAIN.address
+        )
+
+        val room = RoomItem(
+            room = "101",
+            building = BuildingType.MAIN,
+            buildingAddress = BuildingType.MAIN.address,
+            isOccupied = false,
+            currentLesson = null,
+            nextLesson = null,
+            lastLesson = lastLesson
+        )
+
+        assertFalse(room.isOccupied)
+        assertNotNull(room.lastLesson)
+        assertEquals("Д-11", room.lastLesson?.group)
+        assertEquals("Живопись", room.lastLesson?.subject)
+        assertEquals(1, room.lastLesson?.pairNumber)
+        assertEquals("Чирва Д.В.", room.lastLesson?.teacher)
     }
 
     companion object {

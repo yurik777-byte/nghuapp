@@ -6,6 +6,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import ru.nghu.timetable.data.local.LessonEntity
+import ru.nghu.timetable.data.repository.ScheduleRepository
 import ru.nghu.timetable.domain.model.BuildingType
 import ru.nghu.timetable.domain.model.DaySchedule
 import ru.nghu.timetable.domain.model.GroupItem
@@ -319,6 +321,80 @@ class ScreensViewModelTest {
         assertEquals("Иванов И. И.", expandedTeacher.expandedTeacherName)
         val collapsedTeacher = expandedTeacher.copy(expandedTeacherName = null)
         assertNull(collapsedTeacher.expandedTeacherName)
+    }
+
+    @Test
+    fun testRoomItemLastLessonComputationAndDisplay() {
+        val entityP1 = LessonEntity(
+            id = "p1",
+            groupName = "Д-11",
+            date = "2026-10-12",
+            dayOfWeek = "Понедельник",
+            pairNumber = 1,
+            timeStart = "09:00",
+            timeEnd = "10:35",
+            subject = "Живопись",
+            teacher = "Чирва Д.В.",
+            room = "109",
+            building = "main",
+            buildingAddress = "Красный пр-т, 9"
+        )
+        val entityP2 = LessonEntity(
+            id = "p2",
+            groupName = "Д-12",
+            date = "2026-10-12",
+            dayOfWeek = "Понедельник",
+            pairNumber = 2,
+            timeStart = "13:00",
+            timeEnd = "14:35",
+            subject = "Рисунок",
+            teacher = "Чирва Д.В.",
+            room = "109",
+            building = "main",
+            buildingAddress = "Красный пр-т, 9"
+        )
+
+        // 1. Check between pairs at 11:00 (after P1, before P2)
+        val roomsAt11 = ScheduleRepository.computeRoomItemsFromEntities(
+            entities = listOf(entityP1, entityP2),
+            testToday = "2026-10-12",
+            testNow = "11:00"
+        )
+        assertEquals(1, roomsAt11.size)
+        val room11 = roomsAt11[0]
+        assertFalse("Room should be free between pairs", room11.isOccupied)
+        assertNotNull("nextLesson should be P2", room11.nextLesson)
+        assertEquals("Д-12", room11.nextLesson?.group)
+        assertNotNull("lastLesson should be P1", room11.lastLesson)
+        assertEquals("Д-11", room11.lastLesson?.group)
+        assertEquals(1, room11.lastLesson?.pairNumber)
+        assertEquals("Живопись", room11.lastLesson?.subject)
+        assertEquals("Чирва Д.В.", room11.lastLesson?.teacher)
+
+        // 2. Check after all pairs at 15:30
+        val roomsAt15 = ScheduleRepository.computeRoomItemsFromEntities(
+            entities = listOf(entityP1, entityP2),
+            testToday = "2026-10-12",
+            testNow = "15:30"
+        )
+        val room15 = roomsAt15[0]
+        assertFalse("Room should be free at 15:30", room15.isOccupied)
+        assertNull("nextLesson should be null", room15.nextLesson)
+        assertNotNull("lastLesson should be P2", room15.lastLesson)
+        assertEquals("Д-12", room15.lastLesson?.group)
+        assertEquals(2, room15.lastLesson?.pairNumber)
+        assertEquals("Рисунок", room15.lastLesson?.subject)
+
+        // 3. Check next day morning at 08:00
+        val roomsNextDay = ScheduleRepository.computeRoomItemsFromEntities(
+            entities = listOf(entityP1, entityP2),
+            testToday = "2026-10-13",
+            testNow = "08:00"
+        )
+        val roomNextDay = roomsNextDay[0]
+        assertFalse(roomNextDay.isOccupied)
+        assertNotNull("lastLesson should retain previous day's last lesson", roomNextDay.lastLesson)
+        assertEquals("Д-12", roomNextDay.lastLesson?.group)
     }
 
     private fun createSampleLesson(

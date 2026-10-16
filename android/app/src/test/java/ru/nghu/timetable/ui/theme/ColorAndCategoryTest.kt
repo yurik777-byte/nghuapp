@@ -23,64 +23,55 @@ class ColorAndCategoryTest {
 
     @Test
     fun testCategoryColorMappingLight() {
-        // Painting & Drawing -> soft purple/violet
+        // In unified dark graphite theme, clean dark palette is used
         val paintingLight = getCategoryColorScheme(SubjectCategory.PAINTING_DRAWING, isDark = false)
-        assertEquals(CategoryPaintingLightContainer, paintingLight.containerColor)
-        assertEquals(CategoryPaintingLightText, paintingLight.contentColor)
-        assertEquals(CategoryPaintingLightAccent, paintingLight.accentColor)
+        assertEquals(CategoryPaintingDarkContainer, paintingLight.containerColor)
+        assertEquals(CategoryPaintingDarkText, paintingLight.contentColor)
+        assertEquals(CategoryPaintingDarkAccent, paintingLight.accentColor)
 
-        // Design & Digital -> modern electric blue
         val designLight = getCategoryColorScheme(SubjectCategory.DESIGN_DIGITAL, isDark = false)
-        assertEquals(CategoryDesignLightContainer, designLight.containerColor)
-        assertEquals(CategoryDesignLightText, designLight.contentColor)
-        assertEquals(CategoryDesignLightAccent, designLight.accentColor)
+        assertEquals(CategoryDesignDarkContainer, designLight.containerColor)
+        assertEquals(CategoryDesignDarkText, designLight.contentColor)
+        assertEquals(CategoryDesignDarkAccent, designLight.accentColor)
 
-        // Humanities -> emerald/teal
         val humanitiesLight = getCategoryColorScheme(SubjectCategory.HUMANITIES, isDark = false)
-        assertEquals(CategoryHumanitiesLightContainer, humanitiesLight.containerColor)
-        assertEquals(CategoryHumanitiesLightText, humanitiesLight.contentColor)
-        assertEquals(CategoryHumanitiesLightAccent, humanitiesLight.accentColor)
+        assertEquals(CategoryHumanitiesDarkContainer, humanitiesLight.containerColor)
+        assertEquals(CategoryHumanitiesDarkText, humanitiesLight.contentColor)
+        assertEquals(CategoryHumanitiesDarkAccent, humanitiesLight.accentColor)
 
-        // Physical -> warm amber/orange
         val physicalLight = getCategoryColorScheme(SubjectCategory.PHYSICAL, isDark = false)
-        assertEquals(CategoryPhysicalLightContainer, physicalLight.containerColor)
-        assertEquals(CategoryPhysicalLightText, physicalLight.contentColor)
-        assertEquals(CategoryPhysicalLightAccent, physicalLight.accentColor)
+        assertEquals(CategoryPhysicalDarkContainer, physicalLight.containerColor)
+        assertEquals(CategoryPhysicalDarkText, physicalLight.contentColor)
+        assertEquals(CategoryPhysicalDarkAccent, physicalLight.accentColor)
 
-        // Other -> cool slate
         val otherLight = getCategoryColorScheme(SubjectCategory.OTHER, isDark = false)
-        assertEquals(CategoryOtherLightContainer, otherLight.containerColor)
-        assertEquals(CategoryOtherLightText, otherLight.contentColor)
-        assertEquals(CategoryOtherLightAccent, otherLight.accentColor)
+        assertEquals(CategoryOtherDarkContainer, otherLight.containerColor)
+        assertEquals(CategoryOtherDarkText, otherLight.contentColor)
+        assertEquals(CategoryOtherDarkAccent, otherLight.accentColor)
     }
 
     @Test
     fun testCategoryColorMappingDark() {
-        // Painting & Drawing Dark
         val paintingDark = getCategoryColorScheme(SubjectCategory.PAINTING_DRAWING, isDark = true)
         assertEquals(CategoryPaintingDarkContainer, paintingDark.containerColor)
         assertEquals(CategoryPaintingDarkText, paintingDark.contentColor)
         assertEquals(CategoryPaintingDarkAccent, paintingDark.accentColor)
 
-        // Design & Digital Dark
         val designDark = getCategoryColorScheme(SubjectCategory.DESIGN_DIGITAL, isDark = true)
         assertEquals(CategoryDesignDarkContainer, designDark.containerColor)
         assertEquals(CategoryDesignDarkText, designDark.contentColor)
         assertEquals(CategoryDesignDarkAccent, designDark.accentColor)
 
-        // Humanities Dark
         val humanitiesDark = getCategoryColorScheme(SubjectCategory.HUMANITIES, isDark = true)
         assertEquals(CategoryHumanitiesDarkContainer, humanitiesDark.containerColor)
         assertEquals(CategoryHumanitiesDarkText, humanitiesDark.contentColor)
         assertEquals(CategoryHumanitiesDarkAccent, humanitiesDark.accentColor)
 
-        // Physical Dark
         val physicalDark = getCategoryColorScheme(SubjectCategory.PHYSICAL, isDark = true)
         assertEquals(CategoryPhysicalDarkContainer, physicalDark.containerColor)
         assertEquals(CategoryPhysicalDarkText, physicalDark.contentColor)
         assertEquals(CategoryPhysicalDarkAccent, physicalDark.accentColor)
 
-        // Other Dark
         val otherDark = getCategoryColorScheme(SubjectCategory.OTHER, isDark = true)
         assertEquals(CategoryOtherDarkContainer, otherDark.containerColor)
         assertEquals(CategoryOtherDarkText, otherDark.contentColor)
@@ -89,29 +80,26 @@ class ColorAndCategoryTest {
 
     @Test
     fun testBuildingBadgeColorsDifferentiation() {
-        // Main Campus: Muted slate / blue badge
         val mainLight = getBuildingBadgeColors(BuildingType.MAIN, isDark = false)
-        assertEquals(BuildingMainLightContainer, mainLight.containerColor)
-        assertEquals(BuildingMainLightText, mainLight.contentColor)
-        assertEquals(BuildingMainLightBorder, mainLight.borderColor)
-        assertEquals(BuildingMainLightAccent, mainLight.accentColor)
+        assertEquals(BuildingMainDarkContainer, mainLight.containerColor)
+        assertEquals(BuildingMainDarkText, mainLight.contentColor)
+        assertEquals(BuildingMainDarkBorder, mainLight.borderColor)
+        assertEquals(BuildingMainDarkAccent, mainLight.accentColor)
 
         val mainDark = getBuildingBadgeColors(BuildingType.MAIN, isDark = true)
         assertEquals(BuildingMainDarkContainer, mainDark.containerColor)
         assertEquals(BuildingMainDarkText, mainDark.contentColor)
 
-        // Spartaka Campus: Distinct, eye-catching amber / orange badge
         val spartakaLight = getBuildingBadgeColors(BuildingType.SPARTAKA, isDark = false)
-        assertEquals(BuildingSpartakaLightContainer, spartakaLight.containerColor)
-        assertEquals(BuildingSpartakaLightText, spartakaLight.contentColor)
-        assertEquals(BuildingSpartakaLightBorder, spartakaLight.borderColor)
-        assertEquals(BuildingSpartakaLightAccent, spartakaLight.accentColor)
+        assertEquals(BuildingSpartakaDarkContainer, spartakaLight.containerColor)
+        assertEquals(BuildingSpartakaDarkText, spartakaLight.contentColor)
+        assertEquals(BuildingSpartakaDarkBorder, spartakaLight.borderColor)
+        assertEquals(BuildingSpartakaDarkAccent, spartakaLight.accentColor)
 
         val spartakaDark = getBuildingBadgeColors(BuildingType.SPARTAKA, isDark = true)
         assertEquals(BuildingSpartakaDarkContainer, spartakaDark.containerColor)
         assertEquals(BuildingSpartakaDarkText, spartakaDark.contentColor)
 
-        // Verify distinctness between Main and Spartaka colors
         assertFalse(mainLight.containerColor == spartakaLight.containerColor)
         assertFalse(mainLight.accentColor == spartakaLight.accentColor)
     }
@@ -119,16 +107,16 @@ class ColorAndCategoryTest {
     @Test
     fun testStatusColors() {
         val activeLight = getLessonStatusColors(LessonStatus.ACTIVE, isDark = false)
-        assertEquals(StatusActiveLight, activeLight.indicatorColor)
+        assertEquals(StatusActiveDark, activeLight.indicatorColor)
 
         val activeDark = getLessonStatusColors(LessonStatus.ACTIVE, isDark = true)
         assertEquals(StatusActiveDark, activeDark.indicatorColor)
 
         val upcomingLight = getLessonStatusColors(LessonStatus.UPCOMING, isDark = false)
-        assertEquals(StatusUpcomingLight, upcomingLight.indicatorColor)
+        assertEquals(StatusUpcomingDark, upcomingLight.indicatorColor)
 
         val finishedLight = getLessonStatusColors(LessonStatus.FINISHED, isDark = false)
-        assertEquals(StatusFinishedLight, finishedLight.indicatorColor)
+        assertEquals(StatusFinishedDark, finishedLight.indicatorColor)
     }
 
     @Test

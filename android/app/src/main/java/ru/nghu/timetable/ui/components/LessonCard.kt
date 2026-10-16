@@ -1,4 +1,4 @@
-package ru.nghu.timetable.ui.components
+﻿package ru.nghu.timetable.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,13 +40,14 @@ import androidx.compose.ui.unit.sp
 import ru.nghu.timetable.domain.model.BuildingType
 import ru.nghu.timetable.domain.model.Lesson
 import ru.nghu.timetable.domain.model.LessonStatus
+import ru.nghu.timetable.ui.theme.BuildingBadgeColors
 import ru.nghu.timetable.ui.theme.getBuildingBadgeColors
 import ru.nghu.timetable.ui.theme.getCategoryColorScheme
 import ru.nghu.timetable.ui.theme.getLessonStatusColors
 
 /**
- * Modern "Campus"-styled Lesson Card displaying detailed pair information,
- * category accent indicator, teacher avatar, room, and campus building badges.
+ * Modern unified dark-graphite Lesson Card displaying detailed pair information,
+ * teacher avatar, room, and campus building badges in the same dark style as the surroundings.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -58,19 +57,13 @@ fun LessonCard(
     status: LessonStatus? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val isDark = isSystemInDarkTheme()
     val resolvedStatus = status ?: lesson.getStatus()
-    val categoryColors = getCategoryColorScheme(lesson.category, isDark)
-    val buildingColors = getBuildingBadgeColors(lesson.building, isDark)
-    val statusColors = getLessonStatusColors(resolvedStatus, isDark)
 
     val cardBorderColor = if (resolvedStatus == LessonStatus.ACTIVE) {
-        statusColors.indicatorColor
+        Color(0xFF10B981)
     } else {
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        Color(0xFF262933)
     }
-
-    val cardElevation = if (resolvedStatus == LessonStatus.ACTIVE) 3.dp else 1.dp
 
     Card(
         modifier = modifier
@@ -81,179 +74,192 @@ fun LessonCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (resolvedStatus == LessonStatus.FINISHED) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                Color(0xFF14161C)
             } else {
-                MaterialTheme.colorScheme.surface
+                Color(0xFF16181E)
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = cardElevation),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = androidx.compose.foundation.BorderStroke(
             width = if (resolvedStatus == LessonStatus.ACTIVE) 1.5.dp else 1.dp,
             color = cardBorderColor
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
+                .padding(14.dp)
         ) {
-            // Left Accent Color Bar corresponding to Subject Category
-            Box(
-                modifier = Modifier
-                    .width(6.dp)
-                    .fillMaxHeight()
-                    .background(categoryColors.accentColor)
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(14.dp)
+            // Header: Pair Number, Time Interval, and Status Badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header: Pair Number, Time Interval, and Status Badge
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    // Pair Number Chip
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFF20232B),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2E323D)),
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        // Pair Number Chip
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Text(
-                                text = "${lesson.pairNumber} пара",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
-                        }
-
-                        // Time Interval
                         Text(
-                            text = lesson.formattedTime,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "${lesson.pairNumber} пара",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color(0xFFE2E4E9),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
 
-                    // Status Indicator
-                    StatusBadge(status = resolvedStatus)
+                    // Time Interval
+                    Text(
+                        text = lesson.formattedTime,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+
+                // Status Indicator
+                StatusBadge(status = resolvedStatus)
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Subject Title
+            Text(
+                text = lesson.subject,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    lineHeight = 22.sp
+                ),
+                color = if (resolvedStatus == LessonStatus.FINISHED) {
+                    Color(0xFF94A3B8)
+                } else {
+                    Color(0xFFFFFFFF)
+                },
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Category Tag Chip (Dark Graphite Style)
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = Color(0xFF20232B),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2E323D))
+            ) {
+                Text(
+                    text = lesson.category.title,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                    color = Color(0xFF94A3B8),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Teacher Info with Avatar Initials
+            if (lesson.teacher.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TeacherAvatar(
+                        teacherName = lesson.teacher,
+                        modifier = Modifier.size(28.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = lesson.teacher,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                        color = Color(0xFFE2E4E9),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
+            }
 
-                // Subject Title
-                Text(
-                    text = lesson.subject,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp,
-                        lineHeight = 22.sp
-                    ),
-                    color = if (resolvedStatus == LessonStatus.FINISHED) {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Category Tag Chip
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = categoryColors.containerColor
-                ) {
-                    Text(
-                        text = lesson.category.title,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                        color = categoryColors.contentColor,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Teacher Info with Avatar Initials
-                if (lesson.teacher.isNotBlank()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+            // Location Badges (Room + Campus Building)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Room Badge
+                if (lesson.room.isNotBlank()) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFF20232B),
+                        border = androidx.compose.foundation.BorderStroke(
+                            width = 1.dp,
+                            color = Color(0xFF2E323D)
+                        )
                     ) {
-                        TeacherAvatar(
-                            teacherName = lesson.teacher,
-                            modifier = Modifier.size(28.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Text(
-                            text = lesson.teacher,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                // Location Badges (Room + Campus Building)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Room Badge
-                    if (lesson.room.isNotBlank()) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            border = androidx.compose.foundation.BorderStroke(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MeetingRoom,
-                                    contentDescription = "Аудитория",
-                                    modifier = Modifier.size(15.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = if (lesson.room.lowercase().contains("ауд") ||
-                                        lesson.room.lowercase().contains("зал")
-                                    ) {
-                                        lesson.room
-                                    } else {
-                                        "ауд. ${lesson.room}"
-                                    },
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.MeetingRoom,
+                                contentDescription = "Аудитория",
+                                modifier = Modifier.size(15.dp),
+                                tint = Color(0xFF94A3B8)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (lesson.room.lowercase().contains("ауд") ||
+                                    lesson.room.lowercase().contains("зал")
+                                ) {
+                                    lesson.room
+                                } else {
+                                    "ауд. ${lesson.room}"
+                                },
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color(0xFFCBD5E1)
+                            )
                         }
                     }
+                }
 
-                    // Campus Building Badge (Distinct Spartaka vs Main)
-                    BuildingBadge(
-                        building = lesson.building,
-                        buildingAddress = lesson.buildingAddress,
-                        buildingColors = buildingColors
+                // Campus Building Badge
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFF20232B),
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = Color(0xFF2E323D)
                     )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Корпус",
+                            modifier = Modifier.size(15.dp),
+                            tint = if (lesson.building == BuildingType.SPARTAKA) Color(0xFFF59E0B) else Color(0xFF94A3B8)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (lesson.buildingAddress.isNotBlank()) {
+                                "${lesson.building.shortTitle} (${lesson.buildingAddress})"
+                            } else {
+                                "${lesson.building.shortTitle} (${lesson.building.address})"
+                            },
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color(0xFFCBD5E1)
+                        )
+                    }
                 }
             }
         }
@@ -268,15 +274,13 @@ fun StatusBadge(
     status: LessonStatus,
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
-    val colors = getLessonStatusColors(status, isDark)
-
     when (status) {
         LessonStatus.ACTIVE -> {
             Surface(
                 modifier = modifier,
                 shape = RoundedCornerShape(12.dp),
-                color = colors.containerColor
+                color = Color(0xFF132D21),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E5B3D))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -286,13 +290,13 @@ fun StatusBadge(
                         modifier = Modifier
                             .size(7.dp)
                             .clip(CircleShape)
-                            .background(colors.indicatorColor)
+                            .background(Color(0xFF34D399))
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
                         text = "Идёт сейчас",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = colors.contentColor
+                        color = Color(0xFF34D399)
                     )
                 }
             }
@@ -304,9 +308,9 @@ fun StatusBadge(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(7.dp)
+                        .size(6.dp)
                         .clip(CircleShape)
-                        .background(colors.indicatorColor)
+                        .background(Color(0xFF4B5563))
                 )
             }
         }
@@ -317,9 +321,9 @@ fun StatusBadge(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(7.dp)
+                        .size(6.dp)
                         .clip(CircleShape)
-                        .border(1.dp, colors.indicatorColor, CircleShape)
+                        .border(1.dp, Color(0xFF4B5563), CircleShape)
                 )
             }
         }
@@ -328,13 +332,12 @@ fun StatusBadge(
 
 /**
  * Distinct Campus Building Badge.
- * Highlights Spartaka campus with vibrant amber/orange and Main campus with slate/blue.
  */
 @Composable
 fun BuildingBadge(
     building: BuildingType,
     buildingAddress: String,
-    buildingColors: ru.nghu.timetable.ui.theme.BuildingBadgeColors,
+    buildingColors: BuildingBadgeColors,
     modifier: Modifier = Modifier
 ) {
     val displayText = if (buildingAddress.isNotBlank()) {
@@ -346,8 +349,8 @@ fun BuildingBadge(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        color = buildingColors.containerColor,
-        border = androidx.compose.foundation.BorderStroke(1.dp, buildingColors.borderColor)
+        color = Color(0xFF20232B),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2E323D))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -357,20 +360,20 @@ fun BuildingBadge(
                 imageVector = Icons.Default.LocationOn,
                 contentDescription = "Корпус",
                 modifier = Modifier.size(15.dp),
-                tint = buildingColors.accentColor
+                tint = if (building == BuildingType.SPARTAKA) Color(0xFFF59E0B) else Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = displayText,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = buildingColors.contentColor
+                color = Color(0xFFCBD5E1)
             )
         }
     }
 }
 
 /**
- * Circular avatar displaying teacher's initials.
+ * Circular avatar displaying teacher's initials in dark graphite style.
  */
 @Composable
 fun TeacherAvatar(
@@ -382,10 +385,10 @@ fun TeacherAvatar(
     Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = Color(0xFF252834),
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            color = Color(0xFF333745)
         )
     ) {
         Box(
@@ -398,17 +401,16 @@ fun TeacherAvatar(
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp
                     ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = Color(0xFFCBD5E1)
                 )
             } else {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Преподаватель",
                     modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = Color(0xFF94A3B8)
                 )
             }
         }
     }
 }
-

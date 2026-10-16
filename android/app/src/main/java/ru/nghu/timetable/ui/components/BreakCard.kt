@@ -1,4 +1,4 @@
-package ru.nghu.timetable.ui.components
+﻿package ru.nghu.timetable.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,17 +55,17 @@ fun BreakCard(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isCampusSwitch) {
-                if (isDark) Color(0xFF2E1A0F) else Color(0xFFFFF7ED)
+                if (isDark) Color(0xFF231E19) else Color(0xFFFFF7ED)
             } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                if (isDark) Color(0xFF181A20) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
             }
         ),
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
             color = if (isCampusSwitch) {
-                if (isDark) Color(0xFF9A3412) else Color(0xFFFDBA74)
+                if (isDark) Color(0xFF4A3822) else Color(0xFFFDBA74)
             } else {
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                if (isDark) Color(0xFF2A2D37) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
             }
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -112,7 +112,7 @@ fun BreakCard(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = if (durationMinutes >= 35) "Большая перемена ($durationMinutes мин)" else "Перемена $durationMinutes мин",
+                        text = if (durationMinutes >= 35) "Р‘РѕР»СЊС€Р°СЏ РїРµСЂРµРјРµРЅР° ($durationMinutes РјРёРЅ)" else "РџРµСЂРµРјРµРЅР° $durationMinutes РјРёРЅ",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (isCampusSwitch) {
                             if (isDark) Color(0xFFFDBA74) else Color(0xFFC2410C)
@@ -149,7 +149,7 @@ fun BreakCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.WarningAmber,
-                            contentDescription = "Внимание",
+                            contentDescription = "Р’РЅРёРјР°РЅРёРµ",
                             modifier = Modifier
                                 .size(18.dp)
                                 .padding(top = 1.dp),
@@ -160,13 +160,13 @@ fun BreakCard(
 
                         Column {
                             Text(
-                                text = "Смена корпуса!",
+                                text = "РЎРјРµРЅР° РєРѕСЂРїСѓСЃР°!",
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (isDark) Color(0xFFFEF3C7) else Color(0xFF92400E)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "${previousLesson.building.shortTitle} (${previousLesson.building.address}) ➔ " +
+                                text = "${previousLesson.building.shortTitle} (${previousLesson.building.address}) вћ” " +
                                     "${nextLesson.building.shortTitle} (${nextLesson.building.address})",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontWeight = FontWeight.Medium,
@@ -175,7 +175,7 @@ fun BreakCard(
                                 color = if (isDark) Color(0xFFFFEDD5) else Color(0xFF78350F)
                             )
                             Text(
-                                text = "Пешком ~15-20 минут через ул. Спартака",
+                                text = "РџРµС€РєРѕРј ~15-20 РјРёРЅСѓС‚ С‡РµСЂРµР· СѓР». РЎРїР°СЂС‚Р°РєР°",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (isDark) Color(0xFFFDBA74) else Color(0xFFB45309)
                             )

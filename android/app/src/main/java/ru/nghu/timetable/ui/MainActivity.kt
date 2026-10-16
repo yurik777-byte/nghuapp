@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import ru.nghu.timetable.data.repository.ScheduleRepository
 import ru.nghu.timetable.ui.screens.rooms.RoomsScreen
 import ru.nghu.timetable.ui.screens.rooms.RoomsViewModel
@@ -74,6 +75,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PDFBoxResourceLoader.init(applicationContext)
         enableEdgeToEdge()
 
         val repository = ScheduleRepository.getInstance(applicationContext)

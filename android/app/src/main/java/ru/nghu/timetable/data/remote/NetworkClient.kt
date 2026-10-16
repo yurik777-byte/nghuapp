@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit
 object NetworkClient {
 
     /**
-     * Default base URL pointing to the local backend from the Android emulator loopback.
+     * Default base URL pointing to the production Aeza VPS backend.
      */
-    const val DEFAULT_BASE_URL = "http://10.0.2.2:3000/"
+    const val DEFAULT_BASE_URL = "https://nghuapp.duckdns.org/"
 
     /**
      * Mutable base URL in case the user configures a physical device host IP or production domain.
@@ -38,9 +38,14 @@ object NetworkClient {
 
     /**
      * Creates an [OkHttpClient] with logging and timeouts.
+     * Logs request/response bodies only in debug mode to prevent leaking sensitive logs in production.
      */
     fun createOkHttpClient(
-        loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.BODY
+        loggingLevel: HttpLoggingInterceptor.Level = if (ru.nghu.timetable.BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
     ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = loggingLevel

@@ -97,6 +97,7 @@ class ScheduleViewModel(
                                 current.copy(
                                     isLoading = false,
                                     isRefreshing = false,
+                                    isOffline = false,
                                     days = daysList,
                                     selectedDate = updatedDate,
                                     errorMessage = null

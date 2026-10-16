@@ -408,7 +408,9 @@ private fun RoomCard(
     val buildingColors = getBuildingBadgeColors(room.building, isDark)
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggleExpand),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -532,28 +534,52 @@ private fun RoomCard(
                     modifier = Modifier.fillMaxWidth(),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDCFCE7))
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF10B981))
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (room.nextLesson != null) {
-                                "Свободна до ${room.nextLesson!!.timeStart} • Далее: ${room.nextLesson!!.subject}"
-                            } else {
-                                "Свободна на сегодня"
-                            },
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            color = Color(0xFF166534),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF10B981))
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (room.nextLesson != null) {
+                                    "Свободна до ${room.nextLesson!!.timeStart} • Далее: ${room.nextLesson!!.subject}"
+                                } else {
+                                    "Свободна на сегодня"
+                                },
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                color = Color(0xFF166534),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        if (room.lastLesson != null) {
+                            val last = room.lastLesson!!
+                            Spacer(modifier = Modifier.height(4.dp))
+                            val whenInfo = when {
+                                last.dayOfWeek.isNotBlank() -> "${last.dayOfWeek}, "
+                                last.date.isNotBlank() -> "${last.date}, "
+                                else -> ""
+                            }
+                            Text(
+                                text = "В прошлый раз была пара: Группа ${last.group} • $whenInfo${last.formattedTime} • ${last.subject}" +
+                                        if (last.teacher.isNotBlank()) " (${last.teacher})" else "",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color(0xFF15803D),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }

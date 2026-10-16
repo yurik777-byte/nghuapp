@@ -283,13 +283,13 @@ private fun ScheduleTopHeader(
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_nghu_logo),
                     contentDescription = "Логотип НГХУ",
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(32.dp)
                 )
                 Text(
                     text = "НГХУ Расписание",

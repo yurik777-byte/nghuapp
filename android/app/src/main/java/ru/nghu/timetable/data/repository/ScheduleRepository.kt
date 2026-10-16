@@ -1,14 +1,20 @@
 package ru.nghu.timetable.data.repository
 
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import ru.nghu.timetable.data.local.LessonEntity
 import ru.nghu.timetable.data.local.ScheduleDao
 import ru.nghu.timetable.data.local.TimetableDatabase
+import ru.nghu.timetable.data.local.parser.NghuPdfCoordinateParser
+import ru.nghu.timetable.data.local.parser.NghuWebScraper
 import ru.nghu.timetable.data.local.toEntity
 import ru.nghu.timetable.data.remote.NetworkClient
 import ru.nghu.timetable.data.remote.ScheduleApi
@@ -24,21 +30,65 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Repository orchestrating timetable data between local Room database and remote Retrofit API.
- * Implements an Offline-First strategy:
- * 1. Reads local Room DB for instant display (including empty initial state to prevent UI hang).
- * 2. Syncs with backend API over network and updates Room cache (clearing stale cache on empty results).
- * 3. Provides continuous reactive flows for groups, rooms, and teachers with Cyrillic-safe lookups.
+ * Repository orchestrating timetable data between local Room database,
+ * direct on-device HTML/PDF scraping from nghu.ru, and remote Retrofit API.
+ *
+ * Primary mode: Standalone / Serverless on-device parser.
+ * Fallback mode: Remote API if direct scraping fails or is unreachable.
+ * Offline-first: Instant emission from Room SQLite database.
  */
 class ScheduleRepository(
     private val api: ScheduleApi,
-    private val scheduleDao: ScheduleDao
+    private val scheduleDao: ScheduleDao,
+    private val context: Context? = null,
+    private val scraper: NghuWebScraper = NghuWebScraper(),
+    private val pdfParser: NghuPdfCoordinateParser = NghuPdfCoordinateParser()
 ) {
+    private val syncMutex = Mutex()
+    private var lastDirectSyncTimeMs = 0L
+    private val SYNC_COOLDOWN_MS = 24 * 60 * 60 * 1000L // 24 hours cooldown (once a day)
+
+    /**
+     * Performs a direct download and coordinate PDF parse from https://nghu.ru/students/timetable/.
+     * Populates all 24 groups across both pages directly into Room SQLite.
+     */
+    suspend fun syncDirectlyFromNghu(force: Boolean = false): Result<Int> = withContext(Dispatchers.IO) {
+        syncMutex.withLock {
+            val now = System.currentTimeMillis()
+            if (!force && (now - lastDirectSyncTimeMs) < SYNC_COOLDOWN_MS) {
+                val cachedCount = scheduleDao.getAllLessons().firstOrNull()?.size ?: 0
+                if (cachedCount > 0) {
+                    return@withContext Result.success(cachedCount)
+                }
+            }
+
+            runCatching {
+                val pdfList = scraper.fetchAllActiveTimetablePdfs()
+                val allParsedLessons = mutableListOf<LessonEntity>()
+                val seenLessonIds = mutableSetOf<String>()
+
+                for ((pdfBytes, _) in pdfList) {
+                    val lessons = pdfParser.parsePdf(pdfBytes, context)
+                    for (l in lessons) {
+                        if (seenLessonIds.add(l.id)) {
+                            allParsedLessons.add(l)
+                        }
+                    }
+                }
+
+                if (allParsedLessons.isNotEmpty()) {
+                    scheduleDao.replaceAllLessons(allParsedLessons)
+                    lastDirectSyncTimeMs = System.currentTimeMillis()
+                }
+                allParsedLessons.size
+            }
+        }
+    }
 
     /**
      * Observes schedule for a specific academic group with offline-first caching.
      * Emits locally cached [DaySchedule] immediately (or empty list if empty), then triggers
-     * remote network sync and updates Room cache (properly clearing old cache when sync returns 0 lessons).
+     * direct on-device parsing from nghu.ru (or backend API fallback) and updates Room cache.
      */
     fun getScheduleForGroup(group: String): Flow<Result<List<DaySchedule>>> = channelFlow {
         val groupLower = group.trim().lowercase(Locale.ROOT)
@@ -51,21 +101,23 @@ class ScheduleRepository(
             }
         }
 
-        // 2. Concurrently sync with backend API in background
+        // 2. Concurrently sync directly from NGHU in background
         launch {
             try {
-                val response = api.getSchedule(group = group)
-                val remoteEntities = response.days.flatMap { day ->
-                    day.lessons.map { it.toEntity() }
-                }
-
-                // Replace cache with fresh data (if empty, clears stale cache and triggers Room flow)
-                scheduleDao.replaceLessonsForGroup(groupLower, remoteEntities)
+                syncDirectlyFromNghu(force = false)
             } catch (e: Exception) {
-                // Network failed: if local cache is empty, notify subscriber of failure
-                val cached = scheduleDao.getLessonsForGroup(groupLower).firstOrNull()
-                if (cached.isNullOrEmpty()) {
-                    send(Result.failure(e))
+                // Direct scraping failed: try remote API as fallback
+                try {
+                    val response = api.getSchedule(group = group)
+                    val remoteEntities = response.days.flatMap { day ->
+                        day.lessons.map { it.toEntity() }
+                    }
+                    scheduleDao.replaceLessonsForGroup(groupLower, remoteEntities)
+                } catch (fallbackEx: Exception) {
+                    val cached = scheduleDao.getLessonsForGroup(groupLower).firstOrNull()
+                    if (cached.isNullOrEmpty()) {
+                        send(Result.failure(e))
+                    }
                 }
             }
         }
@@ -73,7 +125,7 @@ class ScheduleRepository(
 
     /**
      * Observes classroom occupancy and schedules across campuses with offline fallback.
-     * Emits immediately from cache (or empty list if empty), then updates from live network.
+     * Emits immediately from cache (or empty list if empty), then updates from direct sync or live network.
      */
     fun getAllRooms(): Flow<List<RoomItem>> = channelFlow {
         // 1. Emit computed rooms from Room DB immediately
@@ -84,16 +136,19 @@ class ScheduleRepository(
             }
         }
 
-        // 2. Fetch live occupancy from backend API
+        // 2. Direct sync in background if needed
         launch {
             try {
-                val remoteRooms = api.getRooms()
-                send(remoteRooms.map { it.toDomain() })
+                syncDirectlyFromNghu(force = false)
             } catch (_: Exception) {
-                // If cache was empty and network failed, ensure UI does not hang
-                val cached = scheduleDao.getAllLessons().firstOrNull()
-                if (cached.isNullOrEmpty()) {
-                    send(emptyList())
+                try {
+                    val remoteRooms = api.getRooms()
+                    send(remoteRooms.map { it.toDomain() })
+                } catch (_: Exception) {
+                    val cached = scheduleDao.getAllLessons().firstOrNull()
+                    if (cached.isNullOrEmpty()) {
+                        send(emptyList())
+                    }
                 }
             }
         }
@@ -101,7 +156,7 @@ class ScheduleRepository(
 
     /**
      * Observes teachers, their disciplines, and timetable with offline fallback.
-     * Emits immediately from cache (or empty list if empty), then updates from live network.
+     * Emits immediately from cache (or empty list if empty), then updates from direct sync or live network.
      */
     fun getAllTeachers(): Flow<List<TeacherItem>> = channelFlow {
         // 1. Emit computed teachers from Room DB immediately
@@ -112,23 +167,26 @@ class ScheduleRepository(
             }
         }
 
-        // 2. Fetch enriched teachers from backend API
+        // 2. Direct sync in background if needed
         launch {
             try {
-                val remoteTeachers = api.getTeachers()
-                send(remoteTeachers.map { it.toDomain() })
+                syncDirectlyFromNghu(force = false)
             } catch (_: Exception) {
-                // If cache was empty and network failed, ensure UI does not hang
-                val cached = scheduleDao.getAllLessons().firstOrNull()
-                if (cached.isNullOrEmpty()) {
-                    send(emptyList())
+                try {
+                    val remoteTeachers = api.getTeachers()
+                    send(remoteTeachers.map { it.toDomain() })
+                } catch (_: Exception) {
+                    val cached = scheduleDao.getAllLessons().firstOrNull()
+                    if (cached.isNullOrEmpty()) {
+                        send(emptyList())
+                    }
                 }
             }
         }
     }
 
     /**
-     * Observes all academic groups. Emits groups from API or falls back to distinct groups in Room.
+     * Observes all academic groups. Emits groups from Room or remote API.
      */
     fun getAllGroups(): Flow<List<GroupItem>> = channelFlow {
         // 1. Emit groups discovered in Room DB
@@ -146,15 +204,19 @@ class ScheduleRepository(
             }
         }
 
-        // 2. Fetch full group metadata from API
+        // 2. Direct sync in background if needed
         launch {
             try {
-                val remoteGroups = api.getGroups()
-                send(remoteGroups.map { it.toDomain() })
+                syncDirectlyFromNghu(force = false)
             } catch (_: Exception) {
-                val cached = scheduleDao.getAllGroupNames().firstOrNull()
-                if (cached.isNullOrEmpty()) {
-                    send(emptyList())
+                try {
+                    val remoteGroups = api.getGroups()
+                    send(remoteGroups.map { it.toDomain() })
+                } catch (_: Exception) {
+                    val cached = scheduleDao.getAllGroupNames().firstOrNull()
+                    if (cached.isNullOrEmpty()) {
+                        send(emptyList())
+                    }
                 }
             }
         }
@@ -191,12 +253,29 @@ class ScheduleRepository(
     }
 
     /**
-     * Requests server-side refresh and re-parsing of timetable, then updates local cache.
+     * Requests refresh of timetable data (directly parsing official site first, falling back to backend).
      */
-    suspend fun refreshBackend(): Result<TimetableMeta> = runCatching {
-        val refreshRes = api.refresh()
-        syncAllSchedule().getOrThrow()
-        refreshRes.meta?.toDomain() ?: api.getMeta().toDomain()
+    suspend fun refreshBackend(): Result<TimetableMeta> = withContext(Dispatchers.IO) {
+        runCatching {
+            val directResult = syncDirectlyFromNghu(force = true)
+            if (directResult.isSuccess && (directResult.getOrNull() ?: 0) > 0) {
+                lastDirectSyncTimeMs = System.currentTimeMillis()
+                TimetableMeta(
+                    title = "Расписание занятий НГХУ",
+                    period = "",
+                    semester = "",
+                    updatedAt = LocalDate.now().toString(),
+                    sourceUrl = NghuWebScraper.NGHU_TIMETABLE_PAGE_URL
+                )
+            } else {
+                try {
+                    syncAllSchedule().getOrThrow()
+                    api.getMeta().toDomain()
+                } catch (_: Exception) {
+                    throw directResult.exceptionOrNull() ?: IllegalStateException("Не удалось обновить расписание")
+                }
+            }
+        }
     }
 
     // --- Private Helper Methods ---
@@ -219,45 +298,7 @@ class ScheduleRepository(
             }
     }
 
-    private fun computeRoomItemsFromEntities(entities: List<LessonEntity>): List<RoomItem> {
-        val today = runCatching {
-            LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-        }.getOrDefault("")
 
-        val now = runCatching {
-            LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
-        }.getOrDefault("")
-
-        return entities
-            .filter { it.room.isNotBlank() }
-            .groupBy { "${it.building}:${it.room}" }
-            .map { (_, roomEntities) ->
-                val first = roomEntities.first()
-                val building = BuildingType.fromString(first.building)
-                val roomNumber = first.room
-                val address = first.buildingAddress.ifBlank { building.address }
-
-                val allDomain = roomEntities
-                    .map { it.toDomain() }
-                    .sortedWith(compareBy({ it.date }, { it.pairNumber }))
-
-                val todayLessons = allDomain.filter { it.date == today }
-                val currentLesson = todayLessons.firstOrNull { now >= it.timeStart && now <= it.timeEnd }
-                val nextLesson = todayLessons.firstOrNull { it.timeStart > now }
-
-                RoomItem(
-                    room = roomNumber,
-                    building = building,
-                    buildingAddress = address,
-                    isOccupied = currentLesson != null,
-                    currentLesson = currentLesson,
-                    nextLesson = nextLesson,
-                    daySchedule = todayLessons,
-                    allLessons = allDomain
-                )
-            }
-            .sortedWith(compareBy({ it.building }, { it.room }))
-    }
 
     private fun computeTeacherItemsFromEntities(entities: List<LessonEntity>): List<TeacherItem> {
         return entities
@@ -308,9 +349,69 @@ class ScheduleRepository(
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: ScheduleRepository(
                     api = api,
-                    scheduleDao = TimetableDatabase.getInstance(context).scheduleDao()
+                    scheduleDao = TimetableDatabase.getInstance(context).scheduleDao(),
+                    context = context.applicationContext
                 ).also { INSTANCE = it }
             }
+        }
+
+        internal fun computeRoomItemsFromEntities(
+            entities: List<LessonEntity>,
+            testToday: String? = null,
+            testNow: String? = null
+        ): List<RoomItem> {
+            val today = testToday ?: runCatching {
+                LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            }.getOrDefault("")
+
+            val now = testNow ?: runCatching {
+                LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+            }.getOrDefault("")
+
+            return entities
+                .filter { it.room.isNotBlank() }
+                .groupBy { "${it.building}:${it.room}" }
+                .map { (_, roomEntities) ->
+                    val first = roomEntities.first()
+                    val building = BuildingType.fromString(first.building)
+                    val roomNumber = first.room
+                    val address = first.buildingAddress.ifBlank { building.address }
+
+                    val allDomain = roomEntities
+                        .map { it.toDomain() }
+                        .sortedWith(compareBy({ it.date }, { it.pairNumber }))
+
+                    val todayLessons = allDomain.filter { it.date == today }
+                    val currentLesson = todayLessons.firstOrNull { now >= it.timeStart && now <= it.timeEnd }
+                    val nextLesson = todayLessons.firstOrNull { it.timeStart > now }
+
+                    // Determine the last completed lesson in this room
+                    val pastLessons = allDomain.filter { lesson ->
+                        when {
+                            today.isNotBlank() && lesson.date.isNotBlank() -> {
+                                lesson.date < today || (lesson.date == today && (now.isBlank() || now > lesson.timeEnd))
+                            }
+                            now.isNotBlank() && lesson.timeEnd.isNotBlank() -> {
+                                now > lesson.timeEnd
+                            }
+                            else -> false
+                        }
+                    }
+                    val lastLesson = pastLessons.maxWithOrNull(compareBy({ it.date }, { it.pairNumber }))
+
+                    RoomItem(
+                        room = roomNumber,
+                        building = building,
+                        buildingAddress = address,
+                        isOccupied = currentLesson != null,
+                        currentLesson = currentLesson,
+                        nextLesson = nextLesson,
+                        lastLesson = lastLesson,
+                        daySchedule = todayLessons,
+                        allLessons = allDomain
+                    )
+                }
+                .sortedWith(compareBy({ it.building }, { it.room }))
         }
     }
 }

@@ -1,4 +1,4 @@
-package ru.nghu.timetable.ui.theme
+﻿package ru.nghu.timetable.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -48,55 +49,47 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BrandPrimaryDark,
-    onPrimary = BrandOnPrimaryDark,
-    primaryContainer = BrandPrimaryContainerDark,
-    onPrimaryContainer = BrandOnPrimaryContainerDark,
+    primary = Color(0xFF60A5FA),
+    onPrimary = Color(0xFF0F172A),
+    primaryContainer = Color(0xFF222632),
+    onPrimaryContainer = Color(0xFF93C5FD),
 
-    secondary = BrandSecondaryDark,
-    onSecondary = BrandOnSecondaryDark,
-    secondaryContainer = BrandSecondaryContainerDark,
-    onSecondaryContainer = BrandOnSecondaryContainerDark,
+    secondary = Color(0xFF94A3B8),
+    onSecondary = Color(0xFF0F172A),
+    secondaryContainer = Color(0xFF222632),
+    onSecondaryContainer = Color(0xFFCBD5E1),
 
-    tertiary = BrandTertiaryDark,
-    onTertiary = BrandOnTertiaryDark,
-    tertiaryContainer = BrandTertiaryContainerDark,
-    onTertiaryContainer = BrandOnTertiaryContainerDark,
+    tertiary = Color(0xFF34D399),
+    onTertiary = Color(0xFF064E3B),
+    tertiaryContainer = Color(0xFF1E2624),
+    onTertiaryContainer = Color(0xFFD1FAE5),
 
-    background = BrandBackgroundDark,
-    onBackground = BrandOnBackgroundDark,
-    surface = BrandSurfaceDark,
-    onSurface = BrandOnSurfaceDark,
-    surfaceVariant = BrandSurfaceVariantDark,
-    onSurfaceVariant = BrandOnSurfaceVariantDark,
+    background = Color(0xFF0F1013),
+    onBackground = Color(0xFFF3F4F6),
+    surface = Color(0xFF16181E),
+    onSurface = Color(0xFFF3F4F6),
+    surfaceVariant = Color(0xFF20232B),
+    onSurfaceVariant = Color(0xFF9CA3AF),
 
-    outline = BrandOutlineDark,
-    outlineVariant = BrandOutlineVariantDark,
+    outline = Color(0xFF292C36),
+    outlineVariant = Color(0xFF333642),
 
-    error = BrandErrorDark,
-    onError = BrandOnErrorDark,
-    errorContainer = BrandErrorContainerDark,
-    onErrorContainer = BrandOnErrorContainerDark
+    error = Color(0xFFF87171),
+    onError = Color(0xFF450A0A),
+    errorContainer = Color(0xFF371E22),
+    onErrorContainer = Color(0xFFFECACA)
 )
 
 /**
- * NGHU Timetable Theme applying Material 3 design and Campus-style aesthetics.
- * Supports light & dark modes + dynamic color on Android 12+.
+ * NGHU Timetable Theme applying Material 3 design and unified Dark Graphite aesthetics.
  */
 @Composable
 fun NGHUTimetableTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -112,6 +105,22 @@ fun NGHUTimetableTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
+        content = content
+    )
+}
+
+/**
+ * Short alias for NGHUTimetableTheme.
+ */
+@Composable
+fun NghuTheme(
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    NGHUTimetableTheme(
+        darkTheme = darkTheme,
+        dynamicColor = dynamicColor,
         content = content
     )
 }
