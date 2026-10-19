@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist.zip
+*.apk
+*.html
+!vk-mini-app/index.html
+*.pdf
+!schedule_sample.pdf
+.env.local
+.DS_Store
+.idea/
+.vscode/
