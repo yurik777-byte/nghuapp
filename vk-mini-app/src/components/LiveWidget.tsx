@@ -44,10 +44,35 @@ export const LiveWidget: React.FC<LiveWidgetProps> = ({ status }) => {
 
       {status.type === 'break' && (
         <Card mode="shadow" style={{ padding: 12, background: 'var(--vkui--color_background_secondary)' }}>
-          <Headline level="2" weight="2">Перемена</Headline>
-          <Footnote style={{ marginTop: 4 }}>
-            До начала следующей пары осталось {formatMinutesWord(status.remainingMinutes || 0)}
-          </Footnote>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Headline level="2" weight="2">Перемена</Headline>
+            <Footnote style={{ color: 'var(--vkui--color_accent_blue)', fontWeight: 600 }}>
+              До звонка {formatMinutesWord(status.remainingMinutes || 0)}
+            </Footnote>
+          </div>
+          {status.nextLesson && (
+            <div
+              style={{
+                marginTop: 8,
+                padding: '8px 10px',
+                backgroundColor: 'var(--vkui--color_background_content)',
+                borderRadius: 8,
+                border: '1px solid var(--vkui--color_separator_primary)',
+              }}
+            >
+              <Footnote style={{ color: 'var(--vkui--color_text_subhead)', fontWeight: 600 }}>
+                СЛЕДУЮЩАЯ ПАРА ({status.nextLesson.pairNumber} пара • {status.nextLesson.timeStart})
+              </Footnote>
+              <div style={{ fontWeight: 600, fontSize: 15, marginTop: 2 }}>
+                {status.nextLesson.subject}
+              </div>
+              <Footnote style={{ color: 'var(--vkui--color_text_secondary)', marginTop: 2 }}>
+                {status.nextLesson.room ? `каб. ${status.nextLesson.room}` : ''}
+                {status.nextLesson.room ? ' • ' : ''}
+                {status.nextLesson.buildingAddress || (status.nextLesson.building === 'spartaka' ? 'ул. Спартака, 12' : 'Красный пр-т, 9')}
+              </Footnote>
+            </div>
+          )}
         </Card>
       )}
 
@@ -55,8 +80,14 @@ export const LiveWidget: React.FC<LiveWidgetProps> = ({ status }) => {
         <Card mode="shadow" style={{ padding: 12, background: 'var(--vkui--color_background_secondary)' }}>
           <Headline level="2" weight="2">Скоро начало занятий</Headline>
           <Footnote style={{ marginTop: 4 }}>
-            1 пара начнётся через {formatMinutesWord(status.remainingMinutes || 0)}
+            {status.nextLesson ? `${status.nextLesson.pairNumber} пара начнётся через ` : 'Занятия начнутся через '}
+            {formatMinutesWord(status.remainingMinutes || 0)}
           </Footnote>
+          {status.nextLesson && (
+            <Footnote style={{ color: 'var(--vkui--color_text_secondary)', marginTop: 4 }}>
+              Первая пара: {status.nextLesson.subject} ({status.nextLesson.room ? `каб. ${status.nextLesson.room}, ` : ''}{status.nextLesson.buildingAddress})
+            </Footnote>
+          )}
         </Card>
       )}
     </Div>

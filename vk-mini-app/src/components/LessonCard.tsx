@@ -24,30 +24,64 @@ export function formatSubjectTitle(subject: string): string {
     'имк': 'ИМК',
     'сидп (вирт.мат.)': 'СИДП (Вирт. мат.)',
     'физкультура динамо': 'Физкультура',
+    'поптд': 'ПОПТД (Правовые основы)',
+    'опг': 'ОПГ (Основы произв. графики)',
+    'анализ произв. изо': 'Анализ произведений ИЗО',
   };
 
   return MAP[lower] || clean;
 }
 
 export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => {
-  const isMain = lesson.building === 'main';
+  const isDynamo = lesson.building === 'dynamo' || /динамо/i.test(lesson.room) || /динамо/i.test(lesson.subject);
+  const isSpartaka = !isDynamo && lesson.building === 'spartaka';
+
   const subjectDisplay = formatSubjectTitle(lesson.subject);
+
+  const campusConfig = isDynamo
+    ? {
+        label: 'ст. Динамо',
+        color: '#0099b8',
+        bg: 'rgba(0, 153, 184, 0.12)',
+        border: 'rgba(0, 153, 184, 0.35)',
+      }
+    : isSpartaka
+    ? {
+        label: 'Спартака 12',
+        color: '#E65D00',
+        bg: 'rgba(230, 93, 0, 0.12)',
+        border: 'rgba(230, 93, 0, 0.35)',
+      }
+    : {
+        label: 'Красный 9',
+        color: '#2688EB',
+        bg: 'rgba(63, 138, 224, 0.12)',
+        border: 'rgba(63, 138, 224, 0.35)',
+      };
 
   const renderRoomBadge = () => {
     const rawRoom = (lesson.room || '').trim();
-    if (!rawRoom || rawRoom === 'unknown' || rawRoom === '-') {
+    if (!rawRoom || rawRoom === 'unknown' || rawRoom === '-' || /динамо/i.test(rawRoom)) {
       return null;
     }
 
-    if (/динамо/i.test(rawRoom) || /динамо/i.test(lesson.subject)) {
-      return (
-        <Subhead weight="2" style={{ color: 'var(--vkui--color_accent_blue)', fontWeight: 600 }}>
-          ст. Динамо
-        </Subhead>
-      );
-    }
-
-    return <Subhead weight="2">каб. {rawRoom}</Subhead>;
+    return (
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          backgroundColor: 'var(--vkui--color_background_secondary)',
+          border: '1px solid var(--vkui--color_separator_primary)',
+          padding: '2px 8px',
+          borderRadius: 6,
+          fontSize: 13,
+          fontWeight: 700,
+          color: 'var(--vkui--color_text_primary)',
+        }}
+      >
+        каб. {rawRoom}
+      </div>
+    );
   };
 
   return (
@@ -73,9 +107,9 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => 
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
-            backgroundColor: isMain ? 'rgba(63, 138, 224, 0.12)' : 'rgba(230, 93, 0, 0.12)',
-            color: isMain ? '#2688EB' : '#E65D00',
-            border: `1px solid ${isMain ? 'rgba(63, 138, 224, 0.35)' : 'rgba(230, 93, 0, 0.35)'}`,
+            backgroundColor: campusConfig.bg,
+            color: campusConfig.color,
+            border: `1px solid ${campusConfig.border}`,
             padding: '3px 8px',
             borderRadius: 8,
             fontSize: 12,
@@ -90,11 +124,11 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => 
               width: 7,
               height: 7,
               borderRadius: '50%',
-              backgroundColor: isMain ? '#2688EB' : '#E65D00',
+              backgroundColor: campusConfig.color,
               display: 'inline-block',
             }}
           />
-          {isMain ? 'Красный 9' : 'Спартака 12'}
+          {campusConfig.label}
         </div>
       </div>
 

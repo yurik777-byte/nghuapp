@@ -85,6 +85,8 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
     loadRooms(selectedDate);
   }, [loadRooms, selectedDate]);
 
+  const [onlyFree, setOnlyFree] = useState(false);
+
   const clean = (s: string) => s.toLowerCase().replace(/[\s\-_.]/g, '');
   const cleanSearch = clean(search);
   const searchLower = search.toLowerCase();
@@ -93,6 +95,7 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
     return rooms
       .filter((r) => r.room && r.room.trim().length > 0 && r.room !== 'unknown' && !/динамо/i.test(r.room))
       .filter((r) => {
+        const matchesStatus = !onlyFree || r.status === 'free';
         const matchesSearch =
           !cleanSearch ||
           r.room.toLowerCase().includes(searchLower) ||
@@ -110,9 +113,9 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
           );
 
         const matchesBuilding = buildingFilter === 'all' || r.building === buildingFilter;
-        return matchesSearch && matchesBuilding;
+        return matchesStatus && matchesSearch && matchesBuilding;
       });
-  }, [rooms, search, buildingFilter, cleanSearch, searchLower]);
+  }, [rooms, search, buildingFilter, onlyFree, cleanSearch, searchLower]);
 
   const isToday = selectedDate === getLocalDateString();
   const activeDayObj = days.find((d) => d.date === selectedDate);
@@ -199,7 +202,17 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--vkui--color_text_subhead)' }}>
                 {isToday ? `Сегодня, ${dayTitle}` : dayTitle}
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button
+                  size="s"
+                  mode={onlyFree ? 'primary' : 'secondary'}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setOnlyFree((v) => !v);
+                  }}
+                >
+                  {onlyFree ? '✓ Только свободные' : 'Только свободные'}
+                </Button>
                 <span
                   style={{
                     backgroundColor: 'rgba(75, 179, 75, 0.15)',
@@ -299,7 +312,9 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                             <span style={{ color: 'var(--vkui--color_text_subhead)' }}>
                               {room.nextLesson
                                 ? `до ${room.nextLesson.timeStart} (далее: ${formatSubjectTitle(room.nextLesson.subject)})`
-                                : 'на весь день'}
+                                : room.lastLesson || (new Date().getHours() * 60 + new Date().getMinutes() >= 18 * 60)
+                                ? 'занятия окончены (до завтра)'
+                                : 'свободна на весь день'}
                             </span>
                           ) : (
                             <span style={{ color: 'var(--vkui--color_text_primary)', fontWeight: 500 }}>

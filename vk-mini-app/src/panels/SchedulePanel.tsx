@@ -151,16 +151,23 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({
                     liveStatus.currentLesson?.pairNumber === lesson.pairNumber;
                   const next = currentLessons[idx + 1];
                   let breakMins = 0;
+                  let transfer: { fromAddress: string; toAddress: string } | null = null;
                   if (next) {
                     const [curH, curM] = lesson.timeEnd.split(':').map(Number);
                     const [nextH, nextM] = next.timeStart.split(':').map(Number);
                     breakMins = (nextH * 60 + nextM) - (curH * 60 + curM);
+                    if (lesson.buildingAddress && next.buildingAddress && lesson.buildingAddress !== next.buildingAddress) {
+                      transfer = {
+                        fromAddress: lesson.buildingAddress,
+                        toAddress: next.buildingAddress,
+                      };
+                    }
                   }
 
                   return (
                     <React.Fragment key={`${lesson.pairNumber}-${lesson.subject}-${idx}`}>
                       <LessonCard lesson={lesson} isCurrent={isCurrent} />
-                      {breakMins > 0 && <BreakCard durationMinutes={breakMins} />}
+                      {breakMins > 0 && <BreakCard durationMinutes={breakMins} transfer={transfer} />}
                     </React.Fragment>
                   );
                 })

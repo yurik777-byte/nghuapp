@@ -334,8 +334,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-12_2026-10-19_4_111",
@@ -392,7 +392,7 @@
           "timeStart": "14:40",
           "timeEnd": "16:15",
           "subject": "Математика",
-          "teacher": "Башук М.В.",
+          "teacher": "Башук М.Г.",
           "room": "212",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -440,7 +440,7 @@
           "timeStart": "14:40",
           "timeEnd": "16:15",
           "subject": "Математика",
-          "teacher": "Башук М.В.",
+          "teacher": "Башук М.Г.",
           "room": "212",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -478,8 +478,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Ж-22_2026-10-19_2_207",
@@ -586,8 +586,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-23_2026-10-19_1_111",
@@ -730,8 +730,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Ж-32_2026-10-19_1_211а",
@@ -778,8 +778,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-31_2026-10-19_1_112",
@@ -910,8 +910,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-34_2026-10-19_1_unknown",
@@ -922,8 +922,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-34_2026-10-19_2_203",
@@ -958,8 +958,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Т-31_2026-10-19_2_105",
@@ -1262,7 +1262,7 @@
           "timeStart": "09:00",
           "timeEnd": "10:35",
           "subject": "Живопись",
-          "teacher": "Николаенко О.Н",
+          "teacher": "Николаенко О.Н.",
           "room": "217",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -1274,7 +1274,7 @@
           "timeStart": "10:40",
           "timeEnd": "12:15",
           "subject": "Живопись",
-          "teacher": "Николаенко О.Н",
+          "teacher": "Николаенко О.Н.",
           "room": "217",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -1396,8 +1396,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Ж-22_2026-10-20_1_212",
@@ -1720,8 +1720,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-32_2026-10-20_1_204",
@@ -2098,8 +2098,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-12_2026-10-21_2_111",
@@ -2215,7 +2215,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ОПГ",
+          "subject": "ОПГ (Основы произв. графики)",
           "teacher": "Милова О.В.",
           "room": "216",
           "building": "spartaka",
@@ -2470,8 +2470,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-24_2026-10-21_1_208",
@@ -2686,8 +2686,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-33_2026-10-21_1_12",
@@ -2719,7 +2719,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "15",
           "building": "main",
@@ -2731,7 +2731,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "15",
           "building": "main",
@@ -2767,7 +2767,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "15",
           "building": "main",
@@ -2779,7 +2779,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "15",
           "building": "main",
@@ -2944,8 +2944,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Ж-12_2026-10-22_1_111",
@@ -3316,8 +3316,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-22_2026-10-22_1_203",
@@ -3457,7 +3457,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "Анализ произв. ИЗО",
+          "subject": "Анализ произведений ИЗО",
           "teacher": "Петренко С.Д.",
           "room": "111",
           "building": "main",
@@ -3505,7 +3505,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "Анализ произв. ИЗО",
+          "subject": "Анализ произведений ИЗО",
           "teacher": "Петренко С.Д.",
           "room": "111",
           "building": "main",
@@ -3541,7 +3541,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "203",
           "building": "main",
@@ -3553,7 +3553,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "203",
           "building": "main",
@@ -3566,10 +3566,10 @@
           "timeStart": "16:20",
           "timeEnd": "17:55",
           "subject": "БЖД",
-          "teacher": "",
-          "room": "",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "teacher": "Коробейников А.С.",
+          "room": "212",
+          "building": "spartaka",
+          "buildingAddress": "ул. Спартака, 12"
         },
         {
           "id": "Д-32_2026-10-22_3_203",
@@ -3577,7 +3577,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "203",
           "building": "main",
@@ -3589,7 +3589,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "203",
           "building": "main",
@@ -3722,10 +3722,10 @@
           "timeStart": "16:20",
           "timeEnd": "17:55",
           "subject": "БЖД",
-          "teacher": "",
-          "room": "",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "teacher": "Коробейников А.С.",
+          "room": "212",
+          "building": "spartaka",
+          "buildingAddress": "ул. Спартака, 12"
         },
         {
           "id": "Т-31_2026-10-22_1_116",
@@ -3745,7 +3745,7 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "116",
           "building": "main",
@@ -3898,8 +3898,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-11_2026-10-23_2_12",
@@ -3919,7 +3919,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ОПГ",
+          "subject": "ОПГ (Основы произв. графики)",
           "teacher": "Милова О.В.",
           "room": "216",
           "building": "spartaka",
@@ -3931,7 +3931,7 @@
           "pairNumber": 1,
           "timeStart": "09:00",
           "timeEnd": "10:35",
-          "subject": "ОПГ",
+          "subject": "ОПГ (Основы произв. графики)",
           "teacher": "Милова О.В.",
           "room": "216",
           "building": "spartaka",
@@ -3967,7 +3967,7 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "ОПГ",
+          "subject": "ОПГ (Основы произв. графики)",
           "teacher": "Милова О.В.",
           "room": "216",
           "building": "spartaka",
@@ -3982,8 +3982,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-13_2026-10-23_4_204",
@@ -4030,8 +4030,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-14_2026-10-23_4_217",
@@ -4306,8 +4306,8 @@
           "subject": "Физкультура",
           "teacher": "",
           "room": "Динамо",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "building": "dynamo",
+          "buildingAddress": "ул. Коммунистическая, 60"
         },
         {
           "id": "Д-24_2026-10-23_4_212",
@@ -4706,7 +4706,7 @@
           "timeStart": "10:40",
           "timeEnd": "12:15",
           "subject": "Живопись",
-          "teacher": "",
+          "teacher": "Вальвачева Е.В.",
           "room": "205-206",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
@@ -4909,7 +4909,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
@@ -4933,7 +4933,7 @@
           "pairNumber": 4,
           "timeStart": "14:40",
           "timeEnd": "16:15",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
@@ -5077,7 +5077,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
@@ -5137,7 +5137,7 @@
           "pairNumber": 3,
           "timeStart": "13:00",
           "timeEnd": "14:35",
-          "subject": "ПОПТД",
+          "subject": "ПОПТД (Правовые основы)",
           "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
@@ -5570,8 +5570,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-12_2026-10-19_4_111",
@@ -5638,7 +5638,7 @@
       "timeStart": "14:40",
       "timeEnd": "16:15",
       "subject": "Математика",
-      "teacher": "Башук М.В.",
+      "teacher": "Башук М.Г.",
       "room": "212",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"
@@ -5694,7 +5694,7 @@
       "timeStart": "14:40",
       "timeEnd": "16:15",
       "subject": "Математика",
-      "teacher": "Башук М.В.",
+      "teacher": "Башук М.Г.",
       "room": "212",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"
@@ -5738,8 +5738,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Ж-22_2026-10-19_2_207",
@@ -5864,8 +5864,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-23_2026-10-19_1_111",
@@ -6212,7 +6212,7 @@
       "timeStart": "09:00",
       "timeEnd": "10:35",
       "subject": "Живопись",
-      "teacher": "Николаенко О.Н",
+      "teacher": "Николаенко О.Н.",
       "room": "217",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"
@@ -6226,7 +6226,7 @@
       "timeStart": "10:40",
       "timeEnd": "12:15",
       "subject": "Живопись",
-      "teacher": "Николаенко О.Н",
+      "teacher": "Николаенко О.Н.",
       "room": "217",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"
@@ -6368,8 +6368,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Ж-22_2026-10-20_1_212",
@@ -6788,8 +6788,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-12_2026-10-21_2_111",
@@ -6925,7 +6925,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ОПГ",
+      "subject": "ОПГ (Основы произв. графики)",
       "teacher": "Милова О.В.",
       "room": "216",
       "building": "spartaka",
@@ -7222,8 +7222,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-24_2026-10-21_1_208",
@@ -7334,8 +7334,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Ж-12_2026-10-22_1_111",
@@ -7768,8 +7768,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-22_2026-10-22_1_203",
@@ -7964,8 +7964,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-11_2026-10-23_2_12",
@@ -7989,7 +7989,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ОПГ",
+      "subject": "ОПГ (Основы произв. графики)",
       "teacher": "Милова О.В.",
       "room": "216",
       "building": "spartaka",
@@ -8003,7 +8003,7 @@
       "pairNumber": 1,
       "timeStart": "09:00",
       "timeEnd": "10:35",
-      "subject": "ОПГ",
+      "subject": "ОПГ (Основы произв. графики)",
       "teacher": "Милова О.В.",
       "room": "216",
       "building": "spartaka",
@@ -8045,7 +8045,7 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "ОПГ",
+      "subject": "ОПГ (Основы произв. графики)",
       "teacher": "Милова О.В.",
       "room": "216",
       "building": "spartaka",
@@ -8062,8 +8062,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-13_2026-10-23_4_204",
@@ -8118,8 +8118,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-14_2026-10-23_4_217",
@@ -8440,8 +8440,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-24_2026-10-23_4_212",
@@ -8508,7 +8508,7 @@
       "timeStart": "10:40",
       "timeEnd": "12:15",
       "subject": "Живопись",
-      "teacher": "",
+      "teacher": "Вальвачева Е.В.",
       "room": "205-206",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
@@ -8745,7 +8745,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",
@@ -8773,7 +8773,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",
@@ -8986,8 +8986,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Ж-32_2026-10-19_1_211а",
@@ -9042,8 +9042,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-31_2026-10-19_1_112",
@@ -9196,8 +9196,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-34_2026-10-19_1_unknown",
@@ -9210,8 +9210,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-34_2026-10-19_2_203",
@@ -9252,8 +9252,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Т-31_2026-10-19_2_105",
@@ -9420,8 +9420,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-32_2026-10-20_1_204",
@@ -9812,8 +9812,8 @@
       "subject": "Физкультура",
       "teacher": "",
       "room": "Динамо",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "building": "dynamo",
+      "buildingAddress": "ул. Коммунистическая, 60"
     },
     {
       "id": "Д-33_2026-10-21_1_12",
@@ -9851,7 +9851,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "15",
       "building": "main",
@@ -9865,7 +9865,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "15",
       "building": "main",
@@ -9907,7 +9907,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "15",
       "building": "main",
@@ -9921,7 +9921,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "15",
       "building": "main",
@@ -10019,7 +10019,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "Анализ произв. ИЗО",
+      "subject": "Анализ произведений ИЗО",
       "teacher": "Петренко С.Д.",
       "room": "111",
       "building": "main",
@@ -10075,7 +10075,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "Анализ произв. ИЗО",
+      "subject": "Анализ произведений ИЗО",
       "teacher": "Петренко С.Д.",
       "room": "111",
       "building": "main",
@@ -10117,7 +10117,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "203",
       "building": "main",
@@ -10131,7 +10131,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "203",
       "building": "main",
@@ -10146,10 +10146,10 @@
       "timeStart": "16:20",
       "timeEnd": "17:55",
       "subject": "БЖД",
-      "teacher": "",
-      "room": "",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "teacher": "Коробейников А.С.",
+      "room": "212",
+      "building": "spartaka",
+      "buildingAddress": "ул. Спартака, 12"
     },
     {
       "id": "Д-32_2026-10-22_3_203",
@@ -10159,7 +10159,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "203",
       "building": "main",
@@ -10173,7 +10173,7 @@
       "pairNumber": 4,
       "timeStart": "14:40",
       "timeEnd": "16:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "203",
       "building": "main",
@@ -10328,10 +10328,10 @@
       "timeStart": "16:20",
       "timeEnd": "17:55",
       "subject": "БЖД",
-      "teacher": "",
-      "room": "",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "teacher": "Коробейников А.С.",
+      "room": "212",
+      "building": "spartaka",
+      "buildingAddress": "ул. Спартака, 12"
     },
     {
       "id": "Т-31_2026-10-22_1_116",
@@ -10355,7 +10355,7 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "116",
       "building": "main",
@@ -10719,7 +10719,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",
@@ -10789,7 +10789,7 @@
       "pairNumber": 3,
       "timeStart": "13:00",
       "timeEnd": "14:35",
-      "subject": "ПОПТД",
+      "subject": "ПОПТД (Правовые основы)",
       "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",

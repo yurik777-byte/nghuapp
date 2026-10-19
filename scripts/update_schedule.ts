@@ -27,6 +27,14 @@ async function main() {
     fs.writeFileSync(rootJson, jsonStr, 'utf8');
     console.log(`[Updater] Saved to ${rootJson}`);
 
+    // Run clean_schedule.js to apply post-processing, building mappings, and normalizations
+    const cleanScript = path.resolve(process.cwd(), 'scripts/clean_schedule.js');
+    if (fs.existsSync(cleanScript)) {
+      console.log('[Updater] Running normalizer clean_schedule.js...');
+      const { execSync } = await import('node:child_process');
+      execSync(`node "${cleanScript}"`, { stdio: 'inherit' });
+    }
+
     console.log('[Updater] Done!');
   } catch (err) {
     console.error('[Updater] Failed:', err);

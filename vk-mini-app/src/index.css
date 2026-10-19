@@ -10,7 +10,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  user-select: none;
+  user-select: text;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -20,7 +20,7 @@ html, body {
   flex-direction: column;
 }
 
-/* Custom scrollbar for desktop */
+/* Custom scrollbar for desktop with dark/light mode support */
 @media (min-width: 768px) {
   ::-webkit-scrollbar {
     width: 6px;
@@ -30,10 +30,10 @@ html, body {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--vkui--color_separator_primary, rgba(128, 128, 128, 0.35));
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--vkui--color_icon_secondary, rgba(128, 128, 128, 0.5));
   }
 }

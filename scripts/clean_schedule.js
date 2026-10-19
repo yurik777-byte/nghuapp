@@ -51,12 +51,19 @@ function normalizeSubject(subject, room, teacher) {
     'худ.оформление спектакля': 'Художественное оформление спектакля',
     'имк': 'ИМК',
     'сидп (вирт.мат.)': 'СИДП (Вирт. мат.)',
+    'поптд': 'ПОПТД (Правовые основы)',
+    'опг': 'ОПГ (Основы произв. графики)',
+    'анализ произв. изо': 'Анализ произведений ИЗО',
   };
 
   const lower = s.toLowerCase();
   if (EXPANSIONS[lower]) {
     s = EXPANSIONS[lower];
   }
+
+  // Teacher name normalization
+  if (t === 'Николаенко О.Н') t = 'Николаенко О.Н.';
+  if (t === 'Башук М.В.') t = 'Башук М.Г.';
 
   return { subject: s, room: r, teacher: t };
 }
@@ -79,14 +86,41 @@ function processSchedule(filePath) {
       };
     }
 
+    // Special fix for Course 3 stream lecture BZhD Thursday Pair 5 (D-31..D-34, Zh-31..Zh-32, T-31)
+    if (lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 5 && (lesson.group === 'Д-31' || lesson.group === 'Д-34')) {
+      return {
+        ...lesson,
+        subject: 'БЖД',
+        teacher: 'Коробейников А.С.',
+        room: '212',
+        building: 'spartaka',
+        buildingAddress: 'ул. Спартака, 12',
+      };
+    }
+
+    // Special fix for Zh-12 Saturday Pair 2 Painting (teacher Valvacheva was cut by row break)
+    if (lesson.group === 'Ж-12' && lesson.dayOfWeek === 'Суббота' && lesson.pairNumber === 2) {
+      return {
+        ...lesson,
+        subject: 'Живопись',
+        teacher: 'Вальвачева Е.В.',
+        room: '205-206',
+        building: 'main',
+        buildingAddress: 'Красный пр-т, 9',
+      };
+    }
+
     const { subject, room, teacher } = normalizeSubject(lesson.subject, lesson.room, lesson.teacher);
     let building = lesson.building;
     let buildingAddress = lesson.buildingAddress;
 
-    if (room === '212' || room === '216' || room === '217') {
+    if (room === 'Динамо') {
+      building = 'dynamo';
+      buildingAddress = 'ул. Коммунистическая, 60';
+    } else if (room === '212' || room === '216' || room === '217') {
       building = 'spartaka';
       buildingAddress = 'ул. Спартака, 12';
-    } else if (room && room !== 'Динамо') {
+    } else if (room) {
       building = 'main';
       buildingAddress = 'Красный пр-т, 9';
     }

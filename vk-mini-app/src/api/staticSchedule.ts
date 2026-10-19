@@ -131,7 +131,7 @@ export async function getStaticRooms(
     string,
     {
       room: string;
-      building: 'main' | 'spartaka';
+      building: 'main' | 'spartaka' | 'dynamo';
       buildingAddress: string;
       lessons: RawLesson[];
     }
@@ -265,8 +265,10 @@ export async function getStaticTeachers(nameFilter?: string): Promise<TeacherIte
   >();
 
   for (const lesson of allLessons) {
-    const teacher = lesson.teacher.trim();
+    let teacher = lesson.teacher.trim();
     if (!teacher) continue;
+    if (teacher === 'Николаенко О.Н') teacher = 'Николаенко О.Н.';
+    if (teacher === 'Башук М.В.') teacher = 'Башук М.Г.';
 
     if (!teacherMap.has(teacher)) {
       teacherMap.set(teacher, {

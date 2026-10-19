@@ -10,6 +10,17 @@ import {
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
+function isNetworkError(err: any): boolean {
+  if (!err) return false;
+  const msg = String(err.message || '');
+  return (
+    err.name === 'TypeError' ||
+    msg.includes('fetch') ||
+    msg.includes('NetworkError') ||
+    msg.includes('Load failed')
+  );
+}
+
 export async function fetchSchedule(group: string, date?: string): Promise<ScheduleResponse> {
   const params = new URLSearchParams({ group });
   if (date) params.append('date', date);
@@ -23,7 +34,7 @@ export async function fetchSchedule(group: string, date?: string): Promise<Sched
     }
     return response.json();
   } catch (err: any) {
-    if (!BASE_URL && err?.message?.includes('Failed to fetch')) {
+    if (!BASE_URL && isNetworkError(err)) {
       try {
         return await getStaticSchedule(group, date);
       } catch {
@@ -45,7 +56,7 @@ export async function fetchGroups(): Promise<GroupItem[]> {
     }
     return response.json();
   } catch (err: any) {
-    if (!BASE_URL && err?.message?.includes('Failed to fetch')) {
+    if (!BASE_URL && isNetworkError(err)) {
       try {
         return await getStaticGroups();
       } catch {
@@ -72,7 +83,7 @@ export async function fetchRooms(building?: string, date?: string, time?: string
     }
     return response.json();
   } catch (err: any) {
-    if (!BASE_URL && err?.message?.includes('Failed to fetch')) {
+    if (!BASE_URL && isNetworkError(err)) {
       try {
         return await getStaticRooms(building, date, time);
       } catch {
@@ -97,7 +108,7 @@ export async function fetchTeachers(name?: string): Promise<TeacherItem[]> {
     }
     return response.json();
   } catch (err: any) {
-    if (!BASE_URL && err?.message?.includes('Failed to fetch')) {
+    if (!BASE_URL && isNetworkError(err)) {
       try {
         return await getStaticTeachers(name);
       } catch {
@@ -119,7 +130,7 @@ export async function fetchMeta(): Promise<MetaResponse> {
     }
     return response.json();
   } catch (err: any) {
-    if (!BASE_URL && err?.message?.includes('Failed to fetch')) {
+    if (!BASE_URL && isNetworkError(err)) {
       try {
         return await getStaticMeta();
       } catch {

@@ -59,7 +59,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               НГХУ
             </div>
             <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--vkui--color_text_primary)' }}>
-              Расписание
+              {title || 'Расписание'}
             </span>
           </div>
         }
