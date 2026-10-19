@@ -33,54 +33,23 @@ export function formatSubjectTitle(subject: string): string {
 }
 
 export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => {
-  const isDynamo = lesson.building === 'dynamo' || /динамо/i.test(lesson.room) || /динамо/i.test(lesson.subject);
-  const isSpartaka = !isDynamo && lesson.building === 'spartaka';
-
+  const isSpartaka = lesson.building === 'spartaka';
+  const isDinamo = /динамо/i.test(lesson.room) || /динамо/i.test(lesson.subject);
   const subjectDisplay = formatSubjectTitle(lesson.subject);
 
-  const campusConfig = isDynamo
-    ? {
-        label: 'ст. Динамо',
-        color: '#0099b8',
-        bg: 'rgba(0, 153, 184, 0.12)',
-        border: 'rgba(0, 153, 184, 0.35)',
-      }
-    : isSpartaka
-    ? {
-        label: 'Спартака 12',
-        color: '#E65D00',
-        bg: 'rgba(230, 93, 0, 0.12)',
-        border: 'rgba(230, 93, 0, 0.35)',
-      }
-    : {
-        label: 'Красный 9',
-        color: '#2688EB',
-        bg: 'rgba(63, 138, 224, 0.12)',
-        border: 'rgba(63, 138, 224, 0.35)',
-      };
+  // Campus badge: only show for physical academic buildings (Spartaka 12 or Krasny 9)
+  const campusLabel = isDinamo ? null : isSpartaka ? 'Спартака 12' : 'Красный 9';
 
-  const renderRoomBadge = () => {
+  const renderRoom = () => {
     const rawRoom = (lesson.room || '').trim();
-    if (!rawRoom || rawRoom === 'unknown' || rawRoom === '-' || /динамо/i.test(rawRoom)) {
+    if (!rawRoom || rawRoom === 'unknown' || rawRoom === '-') {
       return null;
     }
-
+    const label = /динамо/i.test(rawRoom) ? 'Динамо' : `каб. ${rawRoom}`;
     return (
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          backgroundColor: 'var(--vkui--color_background_secondary)',
-          border: '1px solid var(--vkui--color_separator_primary)',
-          padding: '2px 8px',
-          borderRadius: 6,
-          fontSize: 13,
-          fontWeight: 700,
-          color: 'var(--vkui--color_text_primary)',
-        }}
-      >
-        каб. {rawRoom}
-      </div>
+      <Footnote style={{ color: 'var(--vkui--color_text_secondary)', fontWeight: 600 }}>
+        {label}
+      </Footnote>
     );
   };
 
@@ -95,48 +64,39 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => 
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <Footnote style={{ color: 'var(--vkui--color_text_subhead)', fontWeight: 600 }}>
-            {lesson.pairNumber} пара • {lesson.timeStart} - {lesson.timeEnd}
+          <Footnote style={{ color: 'var(--vkui--color_text_subhead)' }}>
+            {lesson.pairNumber} пара • {lesson.timeStart} – {lesson.timeEnd}
           </Footnote>
           <Headline level="2" weight="2" style={{ marginTop: 4 }}>
             {subjectDisplay}
           </Headline>
         </div>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            backgroundColor: campusConfig.bg,
-            color: campusConfig.color,
-            border: `1px solid ${campusConfig.border}`,
-            padding: '3px 8px',
-            borderRadius: 8,
-            fontSize: 12,
-            fontWeight: 600,
-            lineHeight: '16px',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          <span
+        {campusLabel && (
+          <div
             style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              backgroundColor: campusConfig.color,
-              display: 'inline-block',
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: isSpartaka ? 'rgba(230, 93, 0, 0.12)' : 'rgba(38, 136, 235, 0.12)',
+              color: isSpartaka ? '#E65D00' : 'var(--vkui--color_accent_blue)',
+              padding: '2px 8px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 600,
+              lineHeight: '16px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
-          />
-          {campusConfig.label}
-        </div>
+          >
+            {campusLabel}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, alignItems: 'center' }}>
         <Subhead style={{ color: 'var(--vkui--color_text_secondary)' }}>
           {lesson.teacher || 'Преподаватель не указан'}
         </Subhead>
-        {renderRoomBadge()}
+        {renderRoom()}
       </div>
     </Card>
   );

@@ -114,13 +114,10 @@ function processSchedule(filePath) {
     let building = lesson.building;
     let buildingAddress = lesson.buildingAddress;
 
-    if (room === 'Динамо') {
-      building = 'dynamo';
-      buildingAddress = 'ул. Коммунистическая, 60';
-    } else if (room === '212' || room === '216' || room === '217') {
+    if (room === '212' || room === '216' || room === '217') {
       building = 'spartaka';
       buildingAddress = 'ул. Спартака, 12';
-    } else if (room) {
+    } else {
       building = 'main';
       buildingAddress = 'Красный пр-т, 9';
     }

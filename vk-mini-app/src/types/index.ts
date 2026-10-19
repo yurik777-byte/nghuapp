@@ -4,7 +4,7 @@ export interface Lesson {
   timeEnd: string;
   subject: string;
   room: string;
-  building: 'main' | 'spartaka' | 'dynamo';
+  building: 'main' | 'spartaka';
   buildingAddress: string;
   teacher: string;
   category?: 'core' | 'academic' | 'general';
@@ -44,7 +44,7 @@ export interface RoomScheduleItem {
 
 export interface RoomItem {
   room: string;
-  building: 'main' | 'spartaka' | 'dynamo';
+  building: 'main' | 'spartaka';
   buildingAddress: string;
   status: 'free' | 'occupied';
   currentLesson: RoomScheduleItem | null;

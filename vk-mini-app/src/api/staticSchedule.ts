@@ -131,7 +131,7 @@ export async function getStaticRooms(
     string,
     {
       room: string;
-      building: 'main' | 'spartaka' | 'dynamo';
+      building: 'main' | 'spartaka';
       buildingAddress: string;
       lessons: RawLesson[];
     }

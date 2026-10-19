@@ -1,7 +1,6 @@
 import React from 'react';
-import { HorizontalScroll, Tabs, TabsItem, Badge } from '@vkontakte/vkui';
+import { HorizontalScroll, Tabs, TabsItem } from '@vkontakte/vkui';
 import { triggerHaptic } from '../utils/storage';
-import { getLocalDateString } from '../utils/timeUtils';
 
 interface DaySelectorProps {
   days: { date: string; dayOfWeek: string }[];
@@ -16,8 +15,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   onSelectDate,
   isDesktop = false,
 }) => {
-  const todayStr = getLocalDateString();
-
   const getShortDayName = (dayName: string) => {
     const map: Record<string, string> = {
       'Понедельник': 'ПН',
@@ -45,7 +42,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
       <Tabs mode="accent">
         {days.map((d) => {
           const isSelected = d.date === selectedDate;
-          const isToday = d.date === todayStr;
           const formattedDate = getFormattedDate(d.date);
 
           return (
@@ -56,7 +52,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
                 triggerHaptic('light');
                 onSelectDate(d.date);
               }}
-              status={isToday ? <Badge mode="prominent">Сегодня</Badge> : undefined}
             >
               {isDesktop ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px' }}>

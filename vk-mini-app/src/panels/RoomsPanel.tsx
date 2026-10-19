@@ -288,22 +288,10 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                       <div style={{ marginTop: 2 }}>
                         <span
                           style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
                             color: isMain ? '#2688EB' : '#E65D00',
                             fontWeight: 600,
                           }}
                         >
-                          <span
-                            style={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: '50%',
-                              backgroundColor: isMain ? '#2688EB' : '#E65D00',
-                              display: 'inline-block',
-                            }}
-                          />
                           {isMain ? 'Красный 9' : 'Спартака 12'}
                         </span>
                         {' • '}

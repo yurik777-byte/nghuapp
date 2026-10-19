@@ -245,7 +245,6 @@ export const TeachersPanel: React.FC<TeachersPanelProps> = ({
                                     style={{
                                       display: 'inline-flex',
                                       alignItems: 'center',
-                                      gap: 4,
                                       fontSize: 11,
                                       fontWeight: 600,
                                       color: isMain ? '#2688EB' : '#E65D00',
@@ -256,15 +255,6 @@ export const TeachersPanel: React.FC<TeachersPanelProps> = ({
                                       borderRadius: 6,
                                     }}
                                   >
-                                    <span
-                                      style={{
-                                        width: 5,
-                                        height: 5,
-                                        borderRadius: '50%',
-                                        backgroundColor: isMain ? '#2688EB' : '#E65D00',
-                                        display: 'inline-block',
-                                      }}
-                                    />
                                     {isMain ? 'Красный 9' : 'Спартака 12'}
                                   </div>
                                 </div>

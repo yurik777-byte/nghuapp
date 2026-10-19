@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Div, Headline, Footnote, Progress, Banner } from '@vkontakte/vkui';
-import { Icon28WarningTriangleOutline, Icon24ClockOutline } from '@vkontakte/icons';
+import { Card, Div, Headline, Footnote, Progress } from '@vkontakte/vkui';
+import { Icon24ClockOutline } from '@vkontakte/icons';
 import { LiveState, formatMinutesWord } from '../utils/timeUtils';
 
 interface LiveWidgetProps {
@@ -14,16 +14,6 @@ export const LiveWidget: React.FC<LiveWidgetProps> = ({ status }) => {
 
   return (
     <Div style={{ paddingBottom: 4 }}>
-      {status.hasBuildingTransfer && (
-        <Banner
-          style={{ marginBottom: 8 }}
-          before={<Icon28WarningTriangleOutline fill="var(--vkui--color_accent_red)" />}
-          title="Переход между корпусами!"
-          subtitle={`${status.transferFrom} → ${status.transferTo}`}
-          mode="tint"
-        />
-      )}
-
       {status.type === 'lesson' && status.currentLesson && (
         <Card mode="shadow" style={{ padding: 12, background: 'var(--vkui--color_background_secondary)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
