@@ -282,6 +282,15 @@ export async function getStaticTeachers(nameFilter?: string): Promise<TeacherIte
     entry.lessons.push(lesson);
   }
 
+  const dayMap = new Map<string, string>();
+  if (data.days) {
+    for (const d of data.days) {
+      if (d.date && d.dayOfWeek) {
+        dayMap.set(d.date, d.dayOfWeek);
+      }
+    }
+  }
+
   const result: TeacherItem[] = [];
   const normalizedFilter = nameFilter?.trim().toLowerCase();
 
@@ -297,7 +306,7 @@ export async function getStaticTeachers(nameFilter?: string): Promise<TeacherIte
 
     const schedule: TeacherLessonItem[] = sortedLessons.map((l) => ({
       date: l.date,
-      dayOfWeek: '',
+      dayOfWeek: l.dayOfWeek || dayMap.get(l.date) || '',
       pairNumber: l.pairNumber,
       timeStart: l.timeStart,
       timeEnd: l.timeEnd,
