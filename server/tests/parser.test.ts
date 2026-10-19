@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parsePdfBuffer, getDayOfWeekFromDate } from '../src/parser/pdfParser.js';
-import { parseTimetablePageHtml, fetchLatestSchedule } from '../src/parser/scraper.js';
+import { parseTimetablePageHtml, parseWpfdJsonResponse, fetchLatestSchedule } from '../src/parser/scraper.js';
 
 describe('PDF Parser & Scraper', () => {
   const samplePdfPath = path.resolve(__dirname, '../../schedule_sample.pdf');
@@ -173,6 +173,54 @@ describe('PDF Parser & Scraper', () => {
       const result = parseTimetablePageHtml(wpfdHtml);
       assert.ok(result.downloadUrl?.includes('wpfd'), 'Should extract wpfd URL');
       assert.strictEqual(result.title, 'Расписание занятий на 4-5 сентября 2026');
+    });
+
+    it('should parse WP File Download JSON API response and pick latest PDF file', () => {
+      const sampleApiResponse = {
+        files: [
+          {
+            ID: 17517,
+            post_title: 'Расписание занятий на 10-12 сентября 2026',
+            ext: 'pdf',
+            openpdflink: 'https://nghu.ru/wp-admin/admin-ajax.php?juwpfisadmin=false&action=wpfd&task=file.download&wpfd_category_id=31&wpfd_file_id=17517&token=&preview=1',
+          },
+          {
+            ID: 19149,
+            post_title: 'Расписание занятий на 14 сентября 2026',
+            ext: 'pdf',
+            openpdflink: 'https://nghu.ru/wp-admin/admin-ajax.php?juwpfisadmin=false&action=wpfd&task=file.download&wpfd_category_id=31&wpfd_file_id=19149&token=&preview=1',
+          },
+          {
+            ID: 19150,
+            post_title: 'Некоторый документ Word',
+            ext: 'docx',
+            openpdflink: 'https://nghu.ru/dl/31/doc.docx',
+          },
+        ],
+      };
+
+      const result = parseWpfdJsonResponse(sampleApiResponse);
+      assert.ok(result.downloadUrl, 'Should extract downloadUrl');
+      assert.strictEqual(
+        result.downloadUrl,
+        'https://nghu.ru/wp-admin/admin-ajax.php?juwpfisadmin=false&action=wpfd&task=file.download&wpfd_category_id=31&wpfd_file_id=19149&token=&preview=1'
+      );
+      assert.strictEqual(result.title, 'Расписание занятий на 14 сентября 2026');
+    });
+
+    it('should return nulls if WP File Download JSON API has no PDF files', () => {
+      const sampleApiResponse = {
+        files: [
+          {
+            ID: 123,
+            post_title: 'Некоторый документ Word',
+            ext: 'docx',
+          },
+        ],
+      };
+      const result = parseWpfdJsonResponse(sampleApiResponse);
+      assert.strictEqual(result.downloadUrl, null);
+      assert.strictEqual(result.title, null);
     });
 
     it('should support fetchLatestSchedule with local fallback (isolated from network)', async () => {

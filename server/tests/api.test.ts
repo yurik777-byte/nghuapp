@@ -2,8 +2,10 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
+import fs from 'node:fs';
 import { app } from '../src/index.js';
 import { scheduleService } from '../src/services/scheduleService.js';
+import { parsePdfBuffer } from '../src/parser/pdfParser.js';
 
 describe('REST API Server & Data Aggregators', () => {
   let server: http.Server;
@@ -13,7 +15,9 @@ describe('REST API Server & Data Aggregators', () => {
     // Ensure scheduleService uses local sample fallback during tests
     const samplePdfPath = path.resolve(__dirname, '../../schedule_sample.pdf');
     scheduleService.setFallbackPdfPath(samplePdfPath);
-    await scheduleService.init();
+    const sampleBuffer = fs.readFileSync(samplePdfPath);
+    const sampleSchedule = await parsePdfBuffer(sampleBuffer, 'file://schedule_sample.pdf');
+    scheduleService.setSchedule(sampleSchedule);
 
     // Start ephemeral HTTP server
     server = http.createServer(app);

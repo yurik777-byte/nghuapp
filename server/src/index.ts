@@ -1,13 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { apiRouter } from './routes/api.js';
 import { scheduleService } from './services/scheduleService.js';
 
 export const app = express();
 
-// Middlewares
+// Security Middlewares
+app.use(helmet());
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
 // Routes
 app.use('/api', apiRouter);

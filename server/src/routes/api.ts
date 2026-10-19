@@ -1,8 +1,22 @@
 import { Router, Request, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { scheduleService } from '../services/scheduleService.js';
 import { BuildingType } from '../types/index.js';
 
 export const apiRouter = Router();
+
+const isTestEnv =
+  process.env.NODE_ENV === 'test' ||
+  process.env.npm_lifecycle_event === 'test' ||
+  process.argv.some((arg) => arg.includes('test'));
+
+const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: isTestEnv ? 100 : 3,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Слишком много запросов на обновление. Пожалуйста, подождите 1 минуту.' },
+});
 
 /**
  * GET /api/meta
@@ -113,7 +127,7 @@ apiRouter.get('/teachers', async (req: Request, res: Response) => {
  * POST /api/refresh
  * Forces reload and re-parse of schedule
  */
-apiRouter.post('/refresh', async (_req: Request, res: Response) => {
+apiRouter.post('/refresh', refreshLimiter, async (_req: Request, res: Response) => {
   try {
     const schedule = await scheduleService.refresh();
     res.json({
