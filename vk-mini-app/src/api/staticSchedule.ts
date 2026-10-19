@@ -138,10 +138,14 @@ export async function getStaticRooms(
   >();
 
   for (const lesson of allLessons) {
-    const key = `${lesson.building}:${lesson.room}`;
+    const rawRoom = (lesson.room || '').trim();
+    if (!rawRoom || rawRoom === 'unknown' || /динамо/i.test(rawRoom)) {
+      continue;
+    }
+    const key = `${lesson.building}:${rawRoom}`;
     if (!roomMap.has(key)) {
       roomMap.set(key, {
-        room: lesson.room,
+        room: rawRoom,
         building: lesson.building,
         buildingAddress: lesson.buildingAddress,
         lessons: [],

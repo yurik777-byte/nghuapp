@@ -52,4 +52,15 @@ describe('Schedule Component Logic', () => {
     expect(isCurrentToday).toBe(true);
     expect(isCurrentOtherDay).toBe(false);
   });
+
+  it('expands abbreviated and irregular subject titles properly', async () => {
+    const { formatSubjectTitle } = await import('../src/components/LessonCard');
+    expect(formatSubjectTitle('Пластическая анат')).toBe('Пластическая анатомия');
+    expect(formatSubjectTitle('пластическая анат.')).toBe('Пластическая анатомия');
+    expect(formatSubjectTitle('Ин.язык')).toBe('Иностранный язык');
+    expect(formatSubjectTitle('Физкультура Динамо')).toBe('Физкультура');
+    expect(formatSubjectTitle('Худ.оформление спект')).toBe('Художественное оформление спектакля');
+    expect(formatSubjectTitle('Естествознаяние')).toBe('Естествознание');
+    expect(formatSubjectTitle('Живопись')).toBe('Живопись');
+  });
 });

@@ -15,6 +15,7 @@ import { Icon28Users3Outline, Icon28WarningTriangleOutline } from '@vkontakte/ic
 import { TeacherItem } from '../types';
 import { fetchTeachers } from '../api/client';
 import { AppHeader, AppTab } from '../components/AppHeader';
+import { formatSubjectTitle } from '../components/LessonCard';
 
 const InitialsAvatar: React.FC<{ size?: number; children?: string }> = ({ size = 40, children }) => (
   <Avatar size={size} initials={children} gradientColor="blue" />
@@ -113,7 +114,7 @@ export const TeachersPanel: React.FC<TeachersPanelProps> = ({
               <Accordion.Summary>
                 <SimpleCell
                   before={<InitialsAvatar size={40}>{t.name.slice(0, 2)}</InitialsAvatar>}
-                  subtitle={t.subjects.join(', ')}
+                  subtitle={t.subjects.map(formatSubjectTitle).join(', ')}
                 >
                   <span style={{ fontWeight: 600 }}>{t.name}</span>
                 </SimpleCell>
@@ -121,11 +122,14 @@ export const TeachersPanel: React.FC<TeachersPanelProps> = ({
               <Accordion.Content>
                 <div style={{ padding: '8px 16px', background: 'var(--vkui--color_background_secondary)' }}>
                   {t.schedule && t.schedule.length > 0 ? (
-                    t.schedule.map((item, idx) => (
-                      <Footnote key={idx} style={{ padding: '4px 0', borderBottom: '1px solid var(--vkui--color_separator_primary)' }}>
-                        {item.dayOfWeek}, {item.pairNumber} пара ({item.timeStart}-{item.timeEnd}): <b>{item.subject}</b> (гр. {item.group}, каб. {item.room})
-                      </Footnote>
-                    ))
+                    t.schedule.map((item, idx) => {
+                      const roomLabel = !item.room || item.room === 'unknown' ? '' : /динамо/i.test(item.room) ? 'ст. Динамо' : `каб. ${item.room}`;
+                      return (
+                        <Footnote key={idx} style={{ padding: '4px 0', borderBottom: '1px solid var(--vkui--color_separator_primary)' }}>
+                          {item.dayOfWeek}, {item.pairNumber} пара ({item.timeStart}-{item.timeEnd}): <b>{formatSubjectTitle(item.subject)}</b> (гр. {item.group}{roomLabel ? `, ${roomLabel}` : ''})
+                        </Footnote>
+                      );
+                    })
                   ) : (
                     <Footnote>Нет запланированных пар в расписании</Footnote>
                   )}
