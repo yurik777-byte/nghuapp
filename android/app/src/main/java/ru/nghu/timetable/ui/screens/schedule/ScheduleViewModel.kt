@@ -22,13 +22,18 @@ import kotlin.reflect.KClass
  */
 class ScheduleViewModel(
     private val repository: ScheduleRepository,
-    initialGroup: String = "Д-11"
+    initialGroup: String? = null
 ) : ViewModel() {
+
+    private val savedGroup = repository.getSavedGroup()
+    val isFirstLaunch: Boolean = repository.isFirstLaunch()
+    private val effectiveGroup = savedGroup ?: initialGroup ?: "Д-11"
 
     private val _uiState = MutableStateFlow(
         ScheduleUiState(
             isLoading = true,
-            selectedGroup = initialGroup
+            selectedGroup = effectiveGroup,
+            isGroupPickerVisible = isFirstLaunch
         )
     )
     val uiState: StateFlow<ScheduleUiState> = _uiState.asStateFlow()
@@ -37,8 +42,9 @@ class ScheduleViewModel(
 
     init {
         observeAvailableGroups()
-        loadSchedule(initialGroup)
+        loadSchedule(effectiveGroup)
     }
+
 
     /**
      * Continuously observes the available academic groups for the bottom sheet picker.
@@ -125,6 +131,7 @@ class ScheduleViewModel(
      * Selects an academic group and reloads its schedule.
      */
     fun selectGroup(group: String) {
+        repository.saveGroup(group)
         if (_uiState.value.selectedGroup == group && _uiState.value.days.isNotEmpty()) {
             _uiState.update { it.copy(isGroupPickerVisible = false) }
             return
@@ -139,6 +146,7 @@ class ScheduleViewModel(
         }
         loadSchedule(group)
     }
+
 
     /**
      * Selects a date tab to display its lessons.
@@ -200,7 +208,7 @@ class ScheduleViewModel(
     companion object {
         fun provideFactory(
             repository: ScheduleRepository,
-            initialGroup: String = "Д-11"
+            initialGroup: String? = null
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -214,3 +222,4 @@ class ScheduleViewModel(
         }
     }
 }
+

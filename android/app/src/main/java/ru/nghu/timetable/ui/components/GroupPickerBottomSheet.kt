@@ -65,6 +65,8 @@ fun GroupPickerBottomSheet(
     selectedGroup: String?,
     onGroupSelected: (GroupItem) -> Unit,
     onDismissRequest: () -> Unit,
+    title: String = "Выбор группы",
+    subtitle: String? = null,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 ) {
@@ -96,17 +98,27 @@ fun GroupPickerBottomSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp)
         ) {
-            // Header with Title and Close Button
+            // Header with Title, Subtitle and Close Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Выбор группы",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (!subtitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
                 IconButton(onClick = onDismissRequest) {
                     Icon(
@@ -116,6 +128,7 @@ fun GroupPickerBottomSheet(
                     )
                 }
             }
+
 
             Spacer(modifier = Modifier.height(10.dp))
 

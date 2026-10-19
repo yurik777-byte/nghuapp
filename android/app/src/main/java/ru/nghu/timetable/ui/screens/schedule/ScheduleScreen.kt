@@ -249,9 +249,12 @@ fun ScheduleScreen(
 
     // Group Picker Modal Bottom Sheet
     if (uiState.isGroupPickerVisible) {
+        val isFirst = viewModel.isFirstLaunch
         GroupPickerBottomSheet(
             groups = uiState.availableGroups,
             selectedGroup = uiState.selectedGroup,
+            title = if (isFirst) "Выберите вашу группу" else "Выбор группы",
+            subtitle = if (isFirst) "Она будет открываться по умолчанию при каждом запуске" else null,
             onGroupSelected = { selected ->
                 viewModel.selectGroup(selected.name)
             },
@@ -260,6 +263,7 @@ fun ScheduleScreen(
             }
         )
     }
+
 }
 
 /**

@@ -12,7 +12,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import ru.nghu.timetable.data.local.LessonEntity
 import ru.nghu.timetable.data.local.ScheduleDao
+import ru.nghu.timetable.data.local.SchedulePreferences
 import ru.nghu.timetable.data.local.TimetableDatabase
+
 import ru.nghu.timetable.data.local.parser.NghuPdfCoordinateParser
 import ru.nghu.timetable.data.local.parser.NghuWebScraper
 import ru.nghu.timetable.data.local.toEntity
@@ -44,9 +46,19 @@ class ScheduleRepository(
     private val scraper: NghuWebScraper = NghuWebScraper(),
     private val pdfParser: NghuPdfCoordinateParser = NghuPdfCoordinateParser()
 ) {
+    private val preferences: SchedulePreferences? = context?.let { SchedulePreferences(it) }
     private val syncMutex = Mutex()
     private var lastDirectSyncTimeMs = 0L
     private val SYNC_COOLDOWN_MS = 24 * 60 * 60 * 1000L // 24 hours cooldown (once a day)
+
+    fun getSavedGroup(): String? = preferences?.savedGroup
+
+    fun saveGroup(group: String) {
+        preferences?.savedGroup = group
+    }
+
+    fun isFirstLaunch(): Boolean = preferences?.isFirstLaunch ?: false
+
 
     /**
      * Performs a direct download and coordinate PDF parse from https://nghu.ru/students/timetable/.
