@@ -60,10 +60,12 @@ class RoomsViewModel(
                             isLoading = false,
                             isRefreshing = false,
                             rooms = roomList,
+                            isOffline = if (roomList.isNotEmpty()) false else current.isOffline,
                             errorMessage = null
                         )
                     }
                 }
+
         }
     }
 
@@ -107,11 +109,12 @@ class RoomsViewModel(
                     _uiState.update { current ->
                         current.copy(
                             isRefreshing = false,
-                            isOffline = true,
-                            errorMessage = if (current.rooms.isEmpty()) "Не удалось подключиться к серверу" else null
+                            isOffline = current.rooms.isEmpty(),
+                            errorMessage = if (current.rooms.isEmpty()) "Не удалось подключиться к сайту НГХУ" else null
                         )
                     }
                 }
+
             )
         }
     }

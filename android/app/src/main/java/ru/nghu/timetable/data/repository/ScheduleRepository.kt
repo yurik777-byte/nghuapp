@@ -242,15 +242,25 @@ class ScheduleRepository(
     }
 
     /**
-     * Syncs full timetable for all groups from remote backend and populates Room DB.
+     * Syncs full timetable for all groups from official site or remote backend and populates Room DB.
      */
-    suspend fun syncAllSchedule(): Result<Unit> = runCatching {
-        val response = api.getSchedule()
-        val allEntities = response.days.flatMap { day ->
-            day.lessons.map { it.toEntity() }
+    suspend fun syncAllSchedule(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val directResult = syncDirectlyFromNghu(force = true)
+            if (directResult.isSuccess && (directResult.getOrNull() ?: 0) > 0) {
+                lastDirectSyncTimeMs = System.currentTimeMillis()
+                Unit
+            } else {
+                val response = api.getSchedule()
+                val allEntities = response.days.flatMap { day ->
+                    day.lessons.map { it.toEntity() }
+                }
+                scheduleDao.replaceAllLessons(allEntities)
+                Unit
+            }
         }
-        scheduleDao.replaceAllLessons(allEntities)
     }
+
 
     /**
      * Requests refresh of timetable data (directly parsing official site first, falling back to backend).

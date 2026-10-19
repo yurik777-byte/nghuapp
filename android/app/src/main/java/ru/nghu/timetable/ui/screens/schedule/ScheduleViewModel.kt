@@ -170,10 +170,11 @@ class ScheduleViewModel(
                     _uiState.update { current ->
                         current.copy(
                             isRefreshing = false,
-                            isOffline = true,
-                            errorMessage = if (current.days.isEmpty()) "Не удалось подключиться к серверу" else null
+                            isOffline = current.days.isEmpty(),
+                            errorMessage = if (current.days.isEmpty()) "Не удалось подключиться к сайту НГХУ" else null
                         )
                     }
+
                     // Re-collect local database data
                     loadSchedule(_uiState.value.selectedGroup)
                 }

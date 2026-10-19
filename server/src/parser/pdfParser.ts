@@ -292,40 +292,100 @@ export async function parsePdfBuffer(
       return { group: h.str, minX, maxX };
     });
 
-    // Day definitions for standard NGHU timetable layout
-    const daysConfig: DayDefinition[] = [
-      {
-        dayOfWeek: getDayOfWeekFromDate(day1Date),
-        date: day1Date,
-        pairs: [
-          { pairNumber: 1, minY: 491, maxY: 506, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
-          { pairNumber: 2, minY: 476, maxY: 491, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
-          { pairNumber: 3, minY: 458, maxY: 476, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
-          { pairNumber: 4, minY: 445, maxY: 458, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
-          { pairNumber: 5, minY: 430, maxY: 445, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
-        ],
-      },
-      {
-        dayOfWeek: getDayOfWeekFromDate(day2Date),
-        date: day2Date,
-        pairs: [
-          { pairNumber: 1, minY: 418, maxY: 430, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
-          { pairNumber: 2, minY: 400, maxY: 418, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
-          { pairNumber: 3, minY: 385, maxY: 400, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
-          { pairNumber: 4, minY: 370, maxY: 385, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
-          { pairNumber: 5, minY: 355, maxY: 370, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
-        ],
-      },
-    ];
+    // Dynamic time row detection (11 time rows per day)
+    const firstGroupX = headerItems[0]?.x || 130;
+    const timeLabels = items
+      .filter((it) => /^\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}\s*$/.test(it.str) && it.x < (firstGroupX - 5))
+      .sort((a, b) => b.y - a.y);
+    const DAY_NAME_REGEX = /^\s*(понедельник|вторник|среда|четверг|пятница|суббота|воскресенье)\s*$/i;
+    const dayLabels = items
+      .filter((it) => DAY_NAME_REGEX.test(it.str) && it.x < (firstGroupX - 5))
+      .sort((a, b) => b.y - a.y);
+
+    const numDays = Math.floor(timeLabels.length / 11);
+    const topGroupY = Math.max(...headerItems.map((h) => h.y), 509);
+    const daysConfig: DayDefinition[] = [];
+
+    if (numDays > 0 && numDays !== 2) {
+      // Dynamic day configuration (e.g. 6-day semester schedule)
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = Sun, 1 = Mon
+      const diffToMonday = currentDay === 0 ? 1 : 1 - currentDay;
+      const refMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+
+      const RUSSIAN_DAY_TO_DOW: Record<string, number> = {
+        'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6, 'воскресенье': 7,
+      };
+
+      for (let d = 0; d < numDays; d++) {
+        const chunk = timeLabels.slice(d * 11, (d + 1) * 11);
+        const topOfPair1 = d === 0 ? (topGroupY - 4) : Math.round((timeLabels[d * 11 - 1].y + chunk[0].y) / 2);
+        const p1p2 = Math.round((chunk[1].y + chunk[2].y) / 2);
+        const p2brk = Math.round((chunk[3].y + chunk[4].y) / 2);
+        const brkp3 = Math.round((chunk[4].y + chunk[5].y) / 2);
+        const p3p4 = Math.round((chunk[6].y + chunk[7].y) / 2);
+        const p4p5 = Math.round((chunk[8].y + chunk[9].y) / 2);
+        const bottomOfPair5 = d === numDays - 1 ? (chunk[10].y - 6) : Math.round((chunk[10].y + timeLabels[(d + 1) * 11].y) / 2);
+
+        const detectedDayStr = dayLabels.find((l) => l.y >= (bottomOfPair5 - 15) && l.y <= (topOfPair1 + 15))?.str?.toLowerCase() || '';
+        const dow = RUSSIAN_DAY_TO_DOW[detectedDayStr] || (d + 1);
+
+        const dayDate = new Date(refMonday.getTime() + (dow - 1) * 86400000);
+        const dateStr = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+
+        daysConfig.push({
+          dayOfWeek: getDayOfWeekFromDate(dateStr),
+          date: dateStr,
+          pairs: [
+            { pairNumber: 1, minY: p1p2, maxY: topOfPair1, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
+            { pairNumber: 2, minY: p2brk, maxY: p1p2, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
+            { pairNumber: 3, minY: p3p4, maxY: brkp3, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
+            { pairNumber: 4, minY: p4p5, maxY: p3p4, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
+            { pairNumber: 5, minY: bottomOfPair5, maxY: p4p5, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
+          ],
+        });
+      }
+    } else {
+      // Day definitions for standard 2-day layout
+      daysConfig.push(
+        {
+          dayOfWeek: getDayOfWeekFromDate(day1Date),
+          date: day1Date,
+          pairs: [
+            { pairNumber: 1, minY: 491, maxY: 506, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
+            { pairNumber: 2, minY: 476, maxY: 491, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
+            { pairNumber: 3, minY: 458, maxY: 476, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
+            { pairNumber: 4, minY: 445, maxY: 458, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
+            { pairNumber: 5, minY: 430, maxY: 445, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
+          ],
+        },
+        {
+          dayOfWeek: getDayOfWeekFromDate(day2Date),
+          date: day2Date,
+          pairs: [
+            { pairNumber: 1, minY: 418, maxY: 430, timeStart: PAIR_TIMES[1].start, timeEnd: PAIR_TIMES[1].end },
+            { pairNumber: 2, minY: 400, maxY: 418, timeStart: PAIR_TIMES[2].start, timeEnd: PAIR_TIMES[2].end },
+            { pairNumber: 3, minY: 385, maxY: 400, timeStart: PAIR_TIMES[3].start, timeEnd: PAIR_TIMES[3].end },
+            { pairNumber: 4, minY: 370, maxY: 385, timeStart: PAIR_TIMES[4].start, timeEnd: PAIR_TIMES[4].end },
+            { pairNumber: 5, minY: 355, maxY: 370, timeStart: PAIR_TIMES[5].start, timeEnd: PAIR_TIMES[5].end },
+          ],
+        }
+      );
+    }
+
+    const minTableY = daysConfig[daysConfig.length - 1].pairs[4].minY;
+    const maxTableY = daysConfig[0].pairs[0].maxY;
 
     for (const day of daysConfig) {
       for (const col of cols) {
         // Filter items belonging to this column (including multi-column wide lecture labels)
         const colItems = items
           .filter((it) => {
-            if (it.y > 506 || it.y < 355 || it.str === 'перерыв') return false;
+            if (it.y > maxTableY || it.y < minTableY || it.str === 'перерыв') return false;
             if (/^\d{1,2}\.\d{2}-\d{1,2}\.\d{2}$/.test(it.str)) return false;
             if (/понедельник|вторник|среда|четверг|пятница|суббота|воскресенье/i.test(it.str)) return false;
+            if (/практик/i.test(it.str)) return false;
+
             const overlap = Math.max(
               0,
               Math.min(it.x + it.w, col.maxX) - Math.max(it.x, col.minX)
@@ -448,7 +508,34 @@ export async function parsePdfBuffer(
         }
       }
     }
+
+    // Detect practice banners on this page (e.g. 4th course pedagogical practice)
+    const practiceItem = items.find((it) => /практик/i.test(it.str));
+    if (practiceItem) {
+      const practiceText = cleanString(practiceItem.str);
+      const groupsOnPage = cols.map((c) => c.group);
+      const emptyGroups = groupsOnPage.filter((g) => !lessons.some((l) => l.group === g));
+      for (const g of emptyGroups) {
+        for (const day of daysConfig) {
+          lessons.push({
+            id: `${g}_${day.date}_1_practice`,
+            group: g,
+            date: day.date,
+            dayOfWeek: day.dayOfWeek,
+            pairNumber: 1,
+            timeStart: PAIR_TIMES[1].start,
+            timeEnd: '14:35',
+            subject: practiceText,
+            teacher: '',
+            room: '',
+            building: 'main',
+            buildingAddress: 'Красный пр-т, 9',
+          });
+        }
+      }
+    }
   }
+
 
   // Aggregate schedule by day
   const daysMap = new Map<string, ScheduleDay>();

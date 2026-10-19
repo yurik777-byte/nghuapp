@@ -577,6 +577,8 @@ class NghuPdfCoordinateParser {
                                 if (it.str.length <= 1) return@filter false
                                 if (Regex("понедельник|вторник|среда|четверг|пятница|суббота|воскресенье", RegexOption.IGNORE_CASE).containsMatchIn(it.str)) return@filter false
                                 if (it.str.matches(Regex("^[ЖДТ]-\\d\\d$"))) return@filter false // Exclude bottom group headers
+                                if (it.str.contains("практик", ignoreCase = true)) return@filter false // Exclude practice banner
+
                                 val centerX = it.x + it.w / 2
                                 val overlap = max(0, min(it.x + it.w, col.maxX) - max(it.x, col.minX))
                                 val isInside = centerX in col.minX until col.maxX
@@ -700,8 +702,42 @@ class NghuPdfCoordinateParser {
                         }
                     }
                 }
+
+                // Detect practice banners on this page (e.g. 4th course pedagogical practice)
+                val practiceItem = items.find { it.str.contains("практик", ignoreCase = true) }
+                if (practiceItem != null) {
+                    val practiceText = cleanString(practiceItem.str)
+                    val groupsOnPage = cols.map { it.group }
+                    val emptyGroups = groupsOnPage.filter { g ->
+                        lessons.none { it.groupName == g }
+                    }
+                    for (g in emptyGroups) {
+                        for (day in daysConfig) {
+                            val pairTime = PAIR_TIMES[1] ?: Pair("09:00", "10:35")
+                            lessons.add(
+                                LessonEntity(
+                                    id = "${g}_${day.date}_1_practice",
+                                    groupName = g,
+                                    groupLower = g.lowercase(Locale.ROOT),
+                                    date = day.date,
+                                    dayOfWeek = day.dayOfWeek,
+                                    pairNumber = 1,
+                                    timeStart = pairTime.first,
+                                    timeEnd = "14:35",
+                                    subject = practiceText,
+                                    teacher = "",
+                                    teacherLower = "",
+                                    room = "",
+                                    building = BuildingType.MAIN.serializedName,
+                                    buildingAddress = BuildingType.MAIN.address
+                                )
+                            )
+                        }
+                    }
+                }
             }
         } finally {
+
             doc.close()
         }
 

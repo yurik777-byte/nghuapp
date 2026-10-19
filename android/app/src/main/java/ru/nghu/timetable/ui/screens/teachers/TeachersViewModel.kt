@@ -59,10 +59,12 @@ class TeachersViewModel(
                             isLoading = false,
                             isRefreshing = false,
                             teachers = teacherList,
+                            isOffline = if (teacherList.isNotEmpty()) false else current.isOffline,
                             errorMessage = null
                         )
                     }
                 }
+
         }
     }
 
@@ -99,11 +101,12 @@ class TeachersViewModel(
                     _uiState.update { current ->
                         current.copy(
                             isRefreshing = false,
-                            isOffline = true,
-                            errorMessage = if (current.teachers.isEmpty()) "Не удалось подключиться к серверу" else null
+                            isOffline = current.teachers.isEmpty(),
+                            errorMessage = if (current.teachers.isEmpty()) "Не удалось подключиться к сайту НГХУ" else null
                         )
                     }
                 }
+
             )
         }
     }
