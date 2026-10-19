@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%">
+  <defs>
+    <!-- Muted sage green matching official NGHU emblem -->
+    <style>
+      .sage-fill { fill: #82A287; }
+      .sage-stroke { stroke: #82A287; stroke-linecap: round; stroke-linejoin: round; }
+      .terracotta-fill { fill: #B3442D; }
+    </style>
+  </defs>
+
+  <!-- ================= DOME SILHOUETTE ================= -->
+  <!-- 1. Central Spire Tip -->
+  <path class="sage-fill" d="M 100 8 L 103.5 15 L 100.8 15 L 100.8 28 L 99.2 28 L 99.2 15 L 96.5 15 Z" />
+
+  <!-- 2. Outer Left Wing -->
+  <path class="sage-fill" d="
+    M 97 32
+    C 86 42, 60 62, 38 88
+    C 24 105, 23 124, 28 136
+    C 31 143, 35 146, 38 147
+    L 56 147
+    C 54 139, 51 126, 52 112
+    C 54 94, 66 76, 84 57
+    C 89 52, 94 43, 97 32
+    Z" />
+
+  <!-- 3. Outer Right Wing -->
+  <path class="sage-fill" d="
+    M 103 32
+    C 114 42, 140 62, 162 88
+    C 176 105, 177 124, 172 136
+    C 169 143, 165 146, 162 147
+    L 144 147
+    C 146 139, 149 126, 148 112
+    C 146 94, 134 76, 116 57
+    C 111 52, 106 43, 103 32
+    Z" />
+
+  <!-- 4. Inner Left Arch (Flanking the central brush) -->
+  <path class="sage-fill" d="
+    M 98 38
+    C 90 48, 77 68, 68 88
+    C 60 106, 60 125, 62 147
+    L 75 147
+    C 74 130, 76 114, 83 97
+    C 89 83, 94 67, 98 48
+    Z" />
+
+  <!-- 5. Inner Right Arch (Flanking the central brush) -->
+  <path class="sage-fill" d="
+    M 102 38
+    C 110 48, 123 68, 132 88
+    C 140 106, 140 125, 138 147
+    L 125 147
+    C 126 130, 124 114, 117 97
+    C 111 83, 106 67, 102 48
+    Z" />
+
+  <!-- ================= CENTRAL ARTIST BRUSH (FLAME / BRISTLES) ================= -->
+  <!-- Central Vault Arch Frame -->
+  <path class="sage-fill" d="
+    M 100 35
+    C 96 46, 91 62, 86 78
+    C 81 94, 79 116, 80 147
+    L 88 147
+    C 87 122, 89 102, 94 85
+    C 97 75, 99 60, 100 48
+    C 101 60, 103 75, 106 85
+    C 111 102, 113 122, 112 147
+    L 120 147
+    C 121 116, 119 94, 114 78
+    C 109 62, 104 46, 100 35
+    Z" />
+
+  <!-- Brush Bristle Strands (Fluid organic flame-hair strokes) -->
+  <g fill="none">
+    <!-- Main Center Spine Bristle -->
+    <path d="M 100 147 L 100 68" stroke="#82A287" stroke-width="2.6" stroke-linecap="round" />
+
+    <!-- Left Organic Flowing Bristle -->
+    <path d="M 92 147 C 91 125, 92 102, 96 82 C 98 74, 99.5 70, 100 66"
+          stroke="#82A287" stroke-width="2.2" stroke-linecap="round" />
+
+    <!-- Right Organic Flowing Bristle -->
+    <path d="M 108 147 C 109 125, 108 102, 104 82 C 102 74, 100.5 70, 100 66"
+          stroke="#82A287" stroke-width="2.2" stroke-linecap="round" />
+
+    <!-- Inner Left Hair -->
+    <path d="M 96 147 C 95 132, 96 114, 98 96"
+          stroke="#82A287" stroke-width="1.6" stroke-linecap="round" />
+
+    <!-- Inner Right Hair -->
+    <path d="M 104 147 C 105 132, 104 114, 102 96"
+          stroke="#82A287" stroke-width="1.6" stroke-linecap="round" />
+  </g>
+
+  <!-- ================= TYPOGRAPHY НГХУ ================= -->
+  <!-- Authentic architectural serif letterforms in terracotta -->
+  <g class="terracotta-fill" transform="translate(0, 0)">
+    <!-- Letter H (x: 42 to 62) -->
+    <path d="
+      M 43 172 L 48 172 L 48 188 L 60 188 L 60 172 L 65 172 L 65 210 L 60 210 L 60 191 L 48 191 L 48 210 L 43 210 Z
+      M 41 172 L 50 172 L 41 172 Z
+    " />
+
+    <!-- Letter Г (x: 75 to 95) -->
+    <path d="
+      M 77 172 L 97 172 L 97 178 L 83 178 L 83 210 L 77 210 Z
+    " />
+
+    <!-- Letter X (x: 108 to 132) -->
+    <path d="
+      M 110 172 L 115 172 L 120 188 L 125 172 L 130 172 L 123 191 L 132 210 L 126 210 L 120 194 L 114 210 L 108 210 L 117 191 Z
+    " />
+
+    <!-- Letter У (x: 142 to 164) -->
+    <path d="
+      M 143 172 L 149 172 L 154 189 L 160 172 L 165 172 L 152 208 C 150 214, 147 216, 142 216 L 140 216 L 140 212 L 143 212 C 145 212, 147 211, 148 207 L 150 200 Z
+    " />
+  </g>
+</svg>
