@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Headline, Subhead, Footnote, Badge } from '@vkontakte/vkui';
+import { Card, Headline, Subhead, Footnote } from '@vkontakte/vkui';
 import { Lesson } from '../types';
 
 interface LessonCardProps {
@@ -68,17 +68,34 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => 
             {subjectDisplay}
           </Headline>
         </div>
-        <Badge
-          mode="prominent"
+        <div
           style={{
-            backgroundColor: isMain ? '#3F8AE0' : '#E65D00',
-            color: '#ffffff',
-            padding: '4px 8px',
-            borderRadius: 6,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            backgroundColor: isMain ? 'rgba(63, 138, 224, 0.12)' : 'rgba(230, 93, 0, 0.12)',
+            color: isMain ? '#2688EB' : '#E65D00',
+            border: `1px solid ${isMain ? 'rgba(63, 138, 224, 0.35)' : 'rgba(230, 93, 0, 0.35)'}`,
+            padding: '3px 8px',
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            lineHeight: '16px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              backgroundColor: isMain ? '#2688EB' : '#E65D00',
+              display: 'inline-block',
+            }}
+          />
           {isMain ? 'Красный 9' : 'Спартака 12'}
-        </Badge>
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, alignItems: 'center' }}>

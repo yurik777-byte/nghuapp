@@ -107,3 +107,34 @@ export function getLocalDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+export function formatDateRussian(dateStr?: string): string {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const day = parseInt(parts[2], 10);
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const MONTHS = [
+    'января',
+    'февраля',
+    'марта',
+    'апреля',
+    'мая',
+    'июня',
+    'июля',
+    'августа',
+    'сентября',
+    'октября',
+    'ноября',
+    'декабря',
+  ];
+  const monthName = MONTHS[monthIdx] || '';
+  return `${day} ${monthName}`.trim();
+}
+
+export function formatDateWithDay(dateStr?: string, dayOfWeek?: string): string {
+  const formatted = formatDateRussian(dateStr);
+  if (!formatted) return dayOfWeek || '';
+  if (!dayOfWeek) return formatted;
+  return `${formatted} (${dayOfWeek})`;
+}
+

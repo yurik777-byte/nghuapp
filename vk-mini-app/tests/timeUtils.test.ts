@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { getCurrentLessonStatus, checkBuildingTransfer, formatMinutesWord, getLocalDateString } from '../src/utils/timeUtils';
+import {
+  getCurrentLessonStatus,
+  checkBuildingTransfer,
+  formatMinutesWord,
+  getLocalDateString,
+  formatDateRussian,
+  formatDateWithDay,
+} from '../src/utils/timeUtils';
 import { Lesson } from '../src/types';
 
 describe('TimeUtils & LiveStatus', () => {
@@ -90,6 +97,16 @@ describe('TimeUtils & LiveStatus', () => {
     const today = new Date();
     const expected = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     expect(getLocalDateString()).toBe(expected);
+  });
+
+  it('formats dates in Russian properly', () => {
+    expect(formatDateRussian('2026-10-19')).toBe('19 октября');
+    expect(formatDateRussian('2026-01-01')).toBe('1 января');
+    expect(formatDateRussian('2026-09-04')).toBe('4 сентября');
+    expect(formatDateRussian('')).toBe('');
+
+    expect(formatDateWithDay('2026-10-19', 'Понедельник')).toBe('19 октября (Понедельник)');
+    expect(formatDateWithDay('2026-10-20', 'Вторник')).toBe('20 октября (Вторник)');
   });
 });
 

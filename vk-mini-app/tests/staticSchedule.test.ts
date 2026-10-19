@@ -5,6 +5,7 @@ import {
   getStaticRooms,
   getStaticTeachers,
   getStaticMeta,
+  getStaticDays,
   RawParsedSchedule,
 } from '../src/api/staticSchedule';
 
@@ -85,12 +86,21 @@ describe('Static Schedule Queries', () => {
     expect(res.days[0].lessons[0].subject).toBe('Живопись');
   });
 
-  it('getStaticRooms computes room occupancy', async () => {
+  it('getStaticRooms computes room occupancy and scopes schedule to target date', async () => {
     const rooms = await getStaticRooms('main', '2026-10-19', '09:30');
     expect(rooms).toHaveLength(1);
     expect(rooms[0].room).toBe('201');
     expect(rooms[0].status).toBe('occupied');
     expect(rooms[0].currentLesson?.subject).toBe('Живопись');
+    expect(rooms[0].schedule).toHaveLength(1);
+    expect(rooms[0].schedule[0].date).toBe('2026-10-19');
+  });
+
+  it('getStaticDays returns available dates', async () => {
+    const days = await getStaticDays();
+    expect(days).toHaveLength(1);
+    expect(days[0].date).toBe('2026-10-19');
+    expect(days[0].dayOfWeek).toBe('Понедельник');
   });
 
   it('getStaticTeachers aggregates teacher schedule', async () => {

@@ -5,6 +5,7 @@ import {
   getStaticRooms,
   getStaticTeachers,
   getStaticMeta,
+  getStaticDays,
 } from './staticSchedule';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -126,5 +127,13 @@ export async function fetchMeta(): Promise<MetaResponse> {
       }
     }
     throw err;
+  }
+}
+
+export async function fetchDays(): Promise<{ date: string; dayOfWeek: string }[]> {
+  try {
+    return await getStaticDays();
+  } catch {
+    return [];
   }
 }

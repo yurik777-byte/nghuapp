@@ -9,16 +9,17 @@ import {
   Spinner,
   Placeholder,
   Button,
-  Badge,
   Accordion,
   Footnote,
   HorizontalScroll,
 } from '@vkontakte/vkui';
 import { Icon28DoorArrowRightOutline, Icon28WarningTriangleOutline } from '@vkontakte/icons';
 import { RoomItem } from '../types';
-import { fetchRooms } from '../api/client';
+import { fetchRooms, fetchDays } from '../api/client';
 import { triggerHaptic } from '../utils/storage';
+import { getLocalDateString, formatDateRussian, formatDateWithDay } from '../utils/timeUtils';
 import { AppHeader, AppTab } from '../components/AppHeader';
+import { DaySelector } from '../components/DaySelector';
 import { formatSubjectTitle } from '../components/LessonCard';
 
 interface RoomsPanelProps {
@@ -43,15 +44,32 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
   onToggleTheme = () => {},
 }) => {
   const [rooms, setRooms] = useState<RoomItem[]>([]);
+  const [days, setDays] = useState<{ date: string; dayOfWeek: string }[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [search, setSearch] = useState('');
   const [buildingFilter, setBuildingFilter] = useState<'all' | 'main' | 'spartaka'>('all');
 
-  const loadRooms = useCallback(() => {
+  // Load available schedule days
+  useEffect(() => {
+    fetchDays()
+      .then((daysList) => {
+        if (daysList && daysList.length > 0) {
+          setDays(daysList);
+          const today = getLocalDateString();
+          if (!daysList.some((d) => d.date === today)) {
+            setSelectedDate(daysList[0].date);
+          }
+        }
+      })
+      .catch((e) => console.error('Failed to load days:', e));
+  }, []);
+
+  const loadRooms = useCallback((dateToLoad: string) => {
     setLoading(true);
     setHasError(false);
-    fetchRooms()
+    fetchRooms(undefined, dateToLoad)
       .then((data) => {
         setRooms(data);
         setHasError(false);
@@ -64,14 +82,14 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
   }, []);
 
   useEffect(() => {
-    loadRooms();
-  }, [loadRooms]);
+    loadRooms(selectedDate);
+  }, [loadRooms, selectedDate]);
+
+  const clean = (s: string) => s.toLowerCase().replace(/[\s\-_.]/g, '');
+  const cleanSearch = clean(search);
+  const searchLower = search.toLowerCase();
 
   const filtered = useMemo(() => {
-    const clean = (s: string) => s.toLowerCase().replace(/[\s\-_.]/g, '');
-    const cleanSearch = clean(search);
-    const searchLower = search.toLowerCase();
-
     return rooms
       .filter((r) => r.room && r.room.trim().length > 0 && r.room !== 'unknown' && !/динамо/i.test(r.room))
       .filter((r) => {
@@ -83,12 +101,22 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
           (r.currentLesson && clean(r.currentLesson.subject).includes(cleanSearch)) ||
           (r.currentLesson && clean(r.currentLesson.group).includes(cleanSearch)) ||
           (r.currentLesson && r.currentLesson.teacher.toLowerCase().includes(searchLower)) ||
-          (r.lastLesson && clean(r.lastLesson.group).includes(cleanSearch));
+          (r.lastLesson && clean(r.lastLesson.group).includes(cleanSearch)) ||
+          r.schedule.some(
+            (s) =>
+              clean(s.group).includes(cleanSearch) ||
+              clean(s.subject).includes(cleanSearch) ||
+              s.teacher.toLowerCase().includes(searchLower)
+          );
 
         const matchesBuilding = buildingFilter === 'all' || r.building === buildingFilter;
         return matchesSearch && matchesBuilding;
       });
-  }, [rooms, search, buildingFilter]);
+  }, [rooms, search, buildingFilter, cleanSearch, searchLower]);
+
+  const isToday = selectedDate === getLocalDateString();
+  const activeDayObj = days.find((d) => d.date === selectedDate);
+  const dayTitle = formatDateRussian(selectedDate) + (activeDayObj?.dayOfWeek ? ` (${activeDayObj.dayOfWeek})` : '');
 
   const freeCount = useMemo(() => filtered.filter((r) => r.status === 'free').length, [filtered]);
   const occupiedCount = useMemo(() => filtered.filter((r) => r.status === 'occupied').length, [filtered]);
@@ -112,7 +140,7 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
             <Search
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск аудитории, предмета или группы..."
+              placeholder="Поиск аудитории, предмета или группы (напр. 21)..."
             />
 
             <HorizontalScroll>
@@ -147,19 +175,56 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
               </Tabs>
             </HorizontalScroll>
 
-            <div style={{ display: 'flex', gap: 12, padding: '10px 16px' }}>
-              <Badge
-                mode="prominent"
-                style={{ backgroundColor: '#4bb34b', color: '#fff', padding: '4px 10px', borderRadius: 8, fontWeight: 600 }}
-              >
-                Свободно: {freeCount}
-              </Badge>
-              <Badge
-                mode="prominent"
-                style={{ backgroundColor: '#e64646', color: '#fff', padding: '4px 10px', borderRadius: 8, fontWeight: 600 }}
-              >
-                Занято: {occupiedCount}
-              </Badge>
+            {days.length > 0 && (
+              <DaySelector
+                days={days}
+                selectedDate={selectedDate}
+                onSelectDate={(date) => {
+                  setSelectedDate(date);
+                }}
+                isDesktop={isDesktop}
+              />
+            )}
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                flexWrap: 'wrap',
+                gap: 8,
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--vkui--color_text_subhead)' }}>
+                {isToday ? `Сегодня, ${dayTitle}` : dayTitle}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <span
+                  style={{
+                    backgroundColor: 'rgba(75, 179, 75, 0.15)',
+                    color: '#2b8830',
+                    padding: '3px 8px',
+                    borderRadius: 6,
+                    fontWeight: 600,
+                    fontSize: 12,
+                  }}
+                >
+                  Свободно: {freeCount}
+                </span>
+                <span
+                  style={{
+                    backgroundColor: 'rgba(230, 70, 70, 0.15)',
+                    color: '#d03030',
+                    padding: '3px 8px',
+                    borderRadius: 6,
+                    fontWeight: 600,
+                    fontSize: 12,
+                  }}
+                >
+                  Занято: {occupiedCount}
+                </span>
+              </div>
             </div>
           </>
         )}
@@ -171,7 +236,7 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
             icon={<Icon28WarningTriangleOutline width={48} height={48} />}
             title="Не удалось загрузить аудитории"
             action={
-              <Button size="m" mode="primary" onClick={loadRooms}>
+              <Button size="m" mode="primary" onClick={() => loadRooms(selectedDate)}>
                 Повторить попытку
               </Button>
             }
@@ -189,37 +254,65 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                   <SimpleCell
                     multiline
                     indicator={
-                      <Badge
-                        mode="prominent"
+                      <span
                         style={{
-                          backgroundColor: isFree ? '#4bb34b' : '#e64646',
-                          color: '#fff',
+                          backgroundColor: isToday
+                            ? isFree
+                              ? '#4bb34b'
+                              : '#e64646'
+                            : 'var(--vkui--color_background_secondary)',
+                          color: isToday ? '#fff' : 'var(--vkui--color_text_subhead)',
                           padding: '3px 8px',
                           borderRadius: 6,
                           fontWeight: 600,
                           fontSize: 12,
                         }}
                       >
-                        {isFree ? 'Свободна' : 'Занята'}
-                      </Badge>
+                        {isToday ? (isFree ? 'Свободна' : 'Занята') : `${room.schedule.length} пар`}
+                      </span>
                     }
                     subtitle={
                       <div style={{ marginTop: 2 }}>
-                        <span style={{ color: isMain ? '#3F8AE0' : '#E65D00', fontWeight: 600 }}>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            color: isMain ? '#2688EB' : '#E65D00',
+                            fontWeight: 600,
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              backgroundColor: isMain ? '#2688EB' : '#E65D00',
+                              display: 'inline-block',
+                            }}
+                          />
                           {isMain ? 'Красный 9' : 'Спартака 12'}
                         </span>
                         {' • '}
-                        {isFree ? (
-                          <span style={{ color: 'var(--vkui--color_text_subhead)' }}>
-                            {room.nextLesson
-                              ? `до ${room.nextLesson.timeStart} (далее: ${formatSubjectTitle(room.nextLesson.subject)})`
-                              : 'на весь день'}
-                          </span>
+                        {isToday ? (
+                          isFree ? (
+                            <span style={{ color: 'var(--vkui--color_text_subhead)' }}>
+                              {room.nextLesson
+                                ? `до ${room.nextLesson.timeStart} (далее: ${formatSubjectTitle(room.nextLesson.subject)})`
+                                : 'на весь день'}
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--vkui--color_text_primary)', fontWeight: 500 }}>
+                              {room.currentLesson
+                                ? `${formatSubjectTitle(room.currentLesson.subject)} (${room.currentLesson.group}) • до ${room.currentLesson.timeEnd}`
+                                : 'Идёт пара'}
+                            </span>
+                          )
                         ) : (
-                          <span style={{ color: 'var(--vkui--color_text_primary)', fontWeight: 500 }}>
-                            {room.currentLesson
-                              ? `${formatSubjectTitle(room.currentLesson.subject)} (${room.currentLesson.group}) • до ${room.currentLesson.timeEnd}`
-                              : 'Идёт пара'}
+                          <span style={{ color: 'var(--vkui--color_text_subhead)' }}>
+                            {room.schedule.length > 0
+                              ? `1-я пара с ${room.schedule[0].timeStart}`
+                              : 'В этот день пар нет'}
                           </span>
                         )}
                       </div>
@@ -228,8 +321,8 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                     <span style={{ fontWeight: 700, fontSize: 16 }}>Кабинет {room.room}</span>
                   </SimpleCell>
 
-                  {/* Who studied here last time - rendered as full-width banner with zero truncation */}
-                  {isFree && room.lastLesson && (
+                  {/* Who studied here earlier today - rendered as full-width banner with zero truncation and exact date */}
+                  {isToday && isFree && room.lastLesson && (
                     <div style={{ padding: '0 16px 10px 16px' }}>
                       <div
                         style={{
@@ -245,11 +338,10 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                         }}
                       >
                         <div style={{ color: '#2b8830', fontWeight: 700, marginBottom: 2 }}>
-                          🕒 В прошлый раз была пара:
+                          🕒 В прошлый раз была пара ({formatDateWithDay(room.lastLesson.date, room.lastLesson.dayOfWeek)}):
                         </div>
                         <div style={{ color: 'var(--vkui--color_text_primary)', fontWeight: 600 }}>
-                          Группа <b>{room.lastLesson.group}</b> • {room.lastLesson.dayOfWeek ? `${room.lastLesson.dayOfWeek}, ` : ''}
-                          {room.lastLesson.timeStart}–{room.lastLesson.timeEnd}
+                          Группа <b>{room.lastLesson.group}</b> • {room.lastLesson.timeStart}–{room.lastLesson.timeEnd}
                         </div>
                         <div style={{ marginTop: 2, fontSize: 12 }}>
                           {formatSubjectTitle(room.lastLesson.subject)}
@@ -263,17 +355,16 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
                 <Accordion.Content>
                   <div style={{ padding: '8px 16px', background: 'var(--vkui--color_background_secondary)' }}>
                     <Footnote style={{ fontWeight: 600, color: 'var(--vkui--color_text_subhead)', marginBottom: 6 }}>
-                      График аудитории:
+                      Расписание на {dayTitle}:
                     </Footnote>
                     {room.schedule && room.schedule.length > 0 ? (
                       room.schedule.map((s, idx) => (
                         <Footnote key={idx} style={{ padding: '4px 0', borderBottom: '1px solid var(--vkui--color_separator_primary)' }}>
-                          {s.dayOfWeek ? `${s.dayOfWeek} ` : ''}
-                          <b>{s.timeStart}-{s.timeEnd}</b>: {formatSubjectTitle(s.subject)} (Группа <b>{s.group}</b>) — {s.teacher}
+                          <b>{s.timeStart}-{s.timeEnd}</b> ({s.pairNumber} пара): {formatSubjectTitle(s.subject)} (Группа <b>{s.group}</b>) — {s.teacher}
                         </Footnote>
                       ))
                     ) : (
-                      <Footnote>На сегодня пар в этом кабинете нет</Footnote>
+                      <Footnote>На этот день пар в этом кабинете нет</Footnote>
                     )}
                   </div>
                 </Accordion.Content>
@@ -287,3 +378,4 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
     </Panel>
   );
 };
+

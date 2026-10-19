@@ -158,7 +158,12 @@ export async function getStaticRooms(
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-  const targetDate = date?.trim() || todayStr;
+  const availableDates = (data.days || []).map((d) => d.date);
+  let targetDate = date?.trim() || todayStr;
+  if (!date && availableDates.length > 0 && !availableDates.includes(targetDate)) {
+    targetDate = availableDates[0];
+  }
+  const isToday = targetDate === todayStr;
   const targetTime = time?.trim() || timeStr;
 
   const result: RoomItem[] = [];
@@ -173,16 +178,22 @@ export async function getStaticRooms(
       return a.pairNumber - b.pairNumber;
     });
 
+    // Strictly the lessons for the target study day
     const dateLessons = sortedLessons.filter((l) => l.date === targetDate);
 
-    const currentRaw =
-      dateLessons.find((l) => targetTime >= l.timeStart && targetTime < l.timeEnd) || null;
+    const currentRaw = isToday
+      ? dateLessons.find((l) => targetTime >= l.timeStart && targetTime < l.timeEnd) || null
+      : null;
 
     let nextRaw: RawLesson | null = null;
-    if (currentRaw) {
-      nextRaw = dateLessons.find((l) => l.pairNumber > currentRaw.pairNumber) || null;
+    if (isToday) {
+      if (currentRaw) {
+        nextRaw = dateLessons.find((l) => l.pairNumber > currentRaw.pairNumber) || null;
+      } else {
+        nextRaw = dateLessons.find((l) => l.timeStart > targetTime) || null;
+      }
     } else {
-      nextRaw = dateLessons.find((l) => l.timeStart > targetTime) || null;
+      nextRaw = dateLessons.length > 0 ? dateLessons[0] : null;
     }
 
     const toRoomScheduleItem = (l: RawLesson): RoomScheduleItem => ({
@@ -199,17 +210,19 @@ export async function getStaticRooms(
     const currentLesson = currentRaw ? toRoomScheduleItem(currentRaw) : null;
     const nextLesson = nextRaw ? toRoomScheduleItem(nextRaw) : null;
 
-    // Determine the last completed lesson in this room
-    const pastLessons = sortedLessons.filter((lesson) => {
-      if (targetDate && lesson.date) {
-        return lesson.date < targetDate || (lesson.date === targetDate && targetTime >= lesson.timeEnd);
+    // Determine the last completed lesson in this room for this study day
+    let lastRaw: RawLesson | null = null;
+    if (isToday) {
+      const pastLessonsToday = dateLessons.filter((l) => targetTime >= l.timeEnd);
+      if (pastLessonsToday.length > 0) {
+        lastRaw = pastLessonsToday[pastLessonsToday.length - 1];
       }
-      return targetTime >= lesson.timeEnd;
-    });
-    const lastRaw = pastLessons.length > 0 ? pastLessons[pastLessons.length - 1] : null;
+    }
+
     const lastLesson = lastRaw ? toRoomScheduleItem(lastRaw) : null;
 
-    const schedule = (date ? dateLessons : sortedLessons).map(toRoomScheduleItem);
+    // Schedule is strictly for the viewing day (never all days of the semester)
+    const schedule = dateLessons.map(toRoomScheduleItem);
 
     result.push({
       room: entry.room,
@@ -232,6 +245,12 @@ export async function getStaticRooms(
 
   return result;
 }
+
+export async function getStaticDays(): Promise<{ date: string; dayOfWeek: string }[]> {
+  const data = await loadStaticSchedule();
+  return (data.days || []).map((d) => ({ date: d.date, dayOfWeek: d.dayOfWeek }));
+}
+
 
 export async function getStaticTeachers(nameFilter?: string): Promise<TeacherItem[]> {
   const data = await loadStaticSchedule();
