@@ -67,12 +67,20 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
   }, [loadRooms]);
 
   const filtered = useMemo(() => {
+    const clean = (s: string) => s.toLowerCase().replace(/[\s\-_.]/g, '');
+    const cleanSearch = clean(search);
+    const searchLower = search.toLowerCase();
+
     return rooms.filter((r) => {
       const matchesSearch =
-        r.room.toLowerCase().includes(search.toLowerCase()) ||
-        (r.currentLesson && r.currentLesson.subject.toLowerCase().includes(search.toLowerCase())) ||
-        (r.currentLesson && r.currentLesson.teacher.toLowerCase().includes(search.toLowerCase())) ||
-        (r.lastLesson && r.lastLesson.group.toLowerCase().includes(search.toLowerCase()));
+        !cleanSearch ||
+        r.room.toLowerCase().includes(searchLower) ||
+        clean(r.room).includes(cleanSearch) ||
+        (r.currentLesson && r.currentLesson.subject.toLowerCase().includes(searchLower)) ||
+        (r.currentLesson && clean(r.currentLesson.subject).includes(cleanSearch)) ||
+        (r.currentLesson && clean(r.currentLesson.group).includes(cleanSearch)) ||
+        (r.currentLesson && r.currentLesson.teacher.toLowerCase().includes(searchLower)) ||
+        (r.lastLesson && clean(r.lastLesson.group).includes(cleanSearch));
 
       const matchesBuilding = buildingFilter === 'all' || r.building === buildingFilter;
       return matchesSearch && matchesBuilding;

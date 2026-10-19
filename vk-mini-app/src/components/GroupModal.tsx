@@ -9,7 +9,9 @@ import {
   Group,
   SimpleCell,
   Banner,
+  Placeholder,
 } from '@vkontakte/vkui';
+import { Icon28Users3Outline } from '@vkontakte/icons';
 import { GroupItem } from '../types';
 import { triggerHaptic } from '../utils/storage';
 
@@ -34,11 +36,43 @@ export const GroupModal: React.FC<GroupModalProps> = ({
   const [search, setSearch] = useState('');
   const [courseFilter, setCourseFilter] = useState<number>(0);
 
-  const filtered = groups.filter((g) => {
-    const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCourse = courseFilter === 0 || g.course === courseFilter;
-    return matchesSearch && matchesCourse;
-  });
+  const clean = (s: string) => s.toLowerCase().replace(/[\s\-_.]/g, '');
+  const query = search.trim();
+  const cleanQ = clean(query);
+
+  const filtered = groups
+    .filter((g) => {
+      if (cleanQ) {
+        const cleanName = clean(g.name);
+        const cleanDept = clean(g.departmentName || '');
+        const nameMatch = cleanName.includes(cleanQ) || g.name.toLowerCase().includes(query.toLowerCase());
+        const deptMatch = cleanDept.includes(cleanQ);
+        const courseMatch =
+          query === String(g.course) ||
+          cleanQ === `${g.course}курс` ||
+          cleanQ === `курс${g.course}`;
+
+        return nameMatch || deptMatch || courseMatch;
+      }
+
+      return courseFilter === 0 || g.course === courseFilter;
+    })
+    .sort((a, b) => {
+      if (cleanQ) {
+        const cleanA = clean(a.name);
+        const cleanB = clean(b.name);
+        const exactA = cleanA === cleanQ ? 1 : 0;
+        const exactB = cleanB === cleanQ ? 1 : 0;
+        if (exactA !== exactB) return exactB - exactA;
+
+        const startA = cleanA.startsWith(cleanQ) ? 1 : 0;
+        const startB = cleanB.startsWith(cleanQ) ? 1 : 0;
+        if (startA !== startB) return startB - startA;
+      }
+
+      if (a.course !== b.course) return a.course - b.course;
+      return a.name.localeCompare(b.name, 'ru');
+    });
 
   return (
     <ModalPage
@@ -60,51 +94,62 @@ export const GroupModal: React.FC<GroupModalProps> = ({
         <Search
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск группы (например: Д-11, ГД-21)..."
+          placeholder="Поиск группы (например: ж21, 21, Д-11)..."
         />
 
-        <HorizontalScroll>
-          <Tabs>
-            <TabsItem selected={courseFilter === 0} onClick={() => setCourseFilter(0)}>
-              Все курсы
-            </TabsItem>
-            <TabsItem selected={courseFilter === 1} onClick={() => setCourseFilter(1)}>
-              1 курс
-            </TabsItem>
-            <TabsItem selected={courseFilter === 2} onClick={() => setCourseFilter(2)}>
-              2 курс
-            </TabsItem>
-            <TabsItem selected={courseFilter === 3} onClick={() => setCourseFilter(3)}>
-              3 курс
-            </TabsItem>
-            <TabsItem selected={courseFilter === 4} onClick={() => setCourseFilter(4)}>
-              4 курс
-            </TabsItem>
-          </Tabs>
-        </HorizontalScroll>
+        {!cleanQ && (
+          <HorizontalScroll>
+            <Tabs>
+              <TabsItem selected={courseFilter === 0} onClick={() => setCourseFilter(0)}>
+                Все курсы
+              </TabsItem>
+              <TabsItem selected={courseFilter === 1} onClick={() => setCourseFilter(1)}>
+                1 курс
+              </TabsItem>
+              <TabsItem selected={courseFilter === 2} onClick={() => setCourseFilter(2)}>
+                2 курс
+              </TabsItem>
+              <TabsItem selected={courseFilter === 3} onClick={() => setCourseFilter(3)}>
+                3 курс
+              </TabsItem>
+              <TabsItem selected={courseFilter === 4} onClick={() => setCourseFilter(4)}>
+                4 курс
+              </TabsItem>
+            </Tabs>
+          </HorizontalScroll>
+        )}
 
         <div style={{ marginTop: 8 }}>
-          {filtered.map((g) => {
-            const isSelected = selectedGroup === g.name;
-            return (
-              <SimpleCell
-                key={g.id || g.name}
-                onClick={() => {
-                  triggerHaptic('medium');
-                  onSelectGroup(g.name);
-                  onClose();
-                }}
-                indicator={isSelected ? 'Выбрана' : undefined}
-                subtitle={`${g.course} курс • ${g.departmentName}`}
-                style={{
-                  backgroundColor: isSelected ? 'var(--vkui--color_background_secondary)' : undefined,
-                  borderRadius: 8,
-                }}
-              >
-                <span style={{ fontWeight: isSelected ? 700 : 500 }}>{g.name}</span>
-              </SimpleCell>
-            );
-          })}
+          {filtered.length > 0 ? (
+            filtered.map((g) => {
+              const isSelected = selectedGroup === g.name;
+              return (
+                <SimpleCell
+                  key={g.id || g.name}
+                  onClick={() => {
+                    triggerHaptic('medium');
+                    onSelectGroup(g.name);
+                    onClose();
+                  }}
+                  indicator={isSelected ? 'Выбрана' : undefined}
+                  subtitle={`${g.course} курс • ${g.departmentName}`}
+                  style={{
+                    backgroundColor: isSelected ? 'var(--vkui--color_background_secondary)' : undefined,
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ fontWeight: isSelected ? 700 : 500 }}>{g.name}</span>
+                </SimpleCell>
+              );
+            })
+          ) : (
+            <Placeholder
+              icon={<Icon28Users3Outline width={48} height={48} />}
+              title="Группа не найдена"
+            >
+              Попробуйте ввести номер (например, 21) или специальность (например, живопись или дизайн).
+            </Placeholder>
+          )}
         </div>
       </Group>
     </ModalPage>
