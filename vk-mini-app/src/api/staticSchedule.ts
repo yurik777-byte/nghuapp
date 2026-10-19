@@ -174,23 +174,37 @@ export async function getStaticRooms(
     const currentRaw =
       dateLessons.find((l) => targetTime >= l.timeStart && targetTime < l.timeEnd) || null;
 
-    let nextRaw: (Lesson & { group: string }) | null = null;
+    let nextRaw: RawLesson | null = null;
     if (currentRaw) {
       nextRaw = dateLessons.find((l) => l.pairNumber > currentRaw.pairNumber) || null;
     } else {
       nextRaw = dateLessons.find((l) => l.timeStart > targetTime) || null;
     }
 
-    const toRoomScheduleItem = (l: Lesson & { group: string }): RoomScheduleItem => ({
+    const toRoomScheduleItem = (l: RawLesson): RoomScheduleItem => ({
       timeStart: l.timeStart,
       timeEnd: l.timeEnd,
       subject: l.subject,
       group: l.group,
       teacher: l.teacher,
+      date: l.date,
+      dayOfWeek: l.dayOfWeek,
+      pairNumber: l.pairNumber,
     });
 
     const currentLesson = currentRaw ? toRoomScheduleItem(currentRaw) : null;
     const nextLesson = nextRaw ? toRoomScheduleItem(nextRaw) : null;
+
+    // Determine the last completed lesson in this room
+    const pastLessons = sortedLessons.filter((lesson) => {
+      if (targetDate && lesson.date) {
+        return lesson.date < targetDate || (lesson.date === targetDate && targetTime >= lesson.timeEnd);
+      }
+      return targetTime >= lesson.timeEnd;
+    });
+    const lastRaw = pastLessons.length > 0 ? pastLessons[pastLessons.length - 1] : null;
+    const lastLesson = lastRaw ? toRoomScheduleItem(lastRaw) : null;
+
     const schedule = (date ? dateLessons : sortedLessons).map(toRoomScheduleItem);
 
     result.push({
@@ -200,6 +214,7 @@ export async function getStaticRooms(
       status: currentLesson !== null ? 'occupied' : 'free',
       currentLesson,
       nextLesson,
+      lastLesson,
       schedule,
     });
   }

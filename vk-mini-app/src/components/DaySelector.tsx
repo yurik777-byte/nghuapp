@@ -7,9 +7,15 @@ interface DaySelectorProps {
   days: { date: string; dayOfWeek: string }[];
   selectedDate: string;
   onSelectDate: (date: string) => void;
+  isDesktop?: boolean;
 }
 
-export const DaySelector: React.FC<DaySelectorProps> = ({ days, selectedDate, onSelectDate }) => {
+export const DaySelector: React.FC<DaySelectorProps> = ({
+  days,
+  selectedDate,
+  onSelectDate,
+  isDesktop = false,
+}) => {
   const todayStr = getLocalDateString();
 
   const getShortDayName = (dayName: string) => {
@@ -41,7 +47,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({ days, selectedDate, on
               }}
               status={isToday ? <Badge mode="prominent">Сегодня</Badge> : undefined}
             >
-              {getShortDayName(d.dayOfWeek)}
+              {isDesktop ? d.dayOfWeek : getShortDayName(d.dayOfWeek)}
             </TabsItem>
           );
         })}

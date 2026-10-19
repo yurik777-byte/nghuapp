@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { ModalPage, ModalPageHeader, Search, HorizontalScroll, Tabs, TabsItem, Group, SimpleCell } from '@vkontakte/vkui';
+import {
+  ModalPage,
+  ModalPageHeader,
+  Search,
+  HorizontalScroll,
+  Tabs,
+  TabsItem,
+  Group,
+  SimpleCell,
+  Banner,
+} from '@vkontakte/vkui';
 import { GroupItem } from '../types';
 import { triggerHaptic } from '../utils/storage';
 
@@ -10,6 +20,7 @@ interface GroupModalProps {
   groups: GroupItem[];
   selectedGroup: string;
   onSelectGroup: (group: string) => void;
+  isFirstLaunch?: boolean;
 }
 
 export const GroupModal: React.FC<GroupModalProps> = ({
@@ -18,6 +29,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
   groups,
   selectedGroup,
   onSelectGroup,
+  isFirstLaunch,
 }) => {
   const [search, setSearch] = useState('');
   const [courseFilter, setCourseFilter] = useState<number>(0);
@@ -29,33 +41,71 @@ export const GroupModal: React.FC<GroupModalProps> = ({
   });
 
   return (
-    <ModalPage id={id} onClose={onClose} header={<ModalPageHeader>Выбор группы</ModalPageHeader>}>
+    <ModalPage
+      id={id}
+      onClose={onClose}
+      header={<ModalPageHeader>Выбор учебной группы</ModalPageHeader>}
+    >
       <Group>
-        <Search value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Поиск группы..." />
+        {isFirstLaunch && (
+          <Banner
+            mode="tint"
+            style={{ margin: '8px 12px 14px' }}
+            before={<span style={{ fontSize: 28, lineHeight: 1 }}>👋</span>}
+            title="Добро пожаловать в НГХУ!"
+            subtitle="Выберите вашу группу. Приложение сохранит выбор и при каждом входе будет сразу открывать ваше расписание."
+          />
+        )}
+
+        <Search
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Поиск группы (например: Д-11, ГД-21)..."
+        />
+
         <HorizontalScroll>
           <Tabs>
-            <TabsItem selected={courseFilter === 0} onClick={() => setCourseFilter(0)}>Все курсы</TabsItem>
-            <TabsItem selected={courseFilter === 1} onClick={() => setCourseFilter(1)}>1 курс</TabsItem>
-            <TabsItem selected={courseFilter === 2} onClick={() => setCourseFilter(2)}>2 курс</TabsItem>
-            <TabsItem selected={courseFilter === 3} onClick={() => setCourseFilter(3)}>3 курс</TabsItem>
-            <TabsItem selected={courseFilter === 4} onClick={() => setCourseFilter(4)}>4 курс</TabsItem>
+            <TabsItem selected={courseFilter === 0} onClick={() => setCourseFilter(0)}>
+              Все курсы
+            </TabsItem>
+            <TabsItem selected={courseFilter === 1} onClick={() => setCourseFilter(1)}>
+              1 курс
+            </TabsItem>
+            <TabsItem selected={courseFilter === 2} onClick={() => setCourseFilter(2)}>
+              2 курс
+            </TabsItem>
+            <TabsItem selected={courseFilter === 3} onClick={() => setCourseFilter(3)}>
+              3 курс
+            </TabsItem>
+            <TabsItem selected={courseFilter === 4} onClick={() => setCourseFilter(4)}>
+              4 курс
+            </TabsItem>
           </Tabs>
         </HorizontalScroll>
 
-        {filtered.map((g) => (
-          <SimpleCell
-            key={g.id || g.name}
-            onClick={() => {
-              triggerHaptic('medium');
-              onSelectGroup(g.name);
-              onClose();
-            }}
-            indicator={selectedGroup === g.name ? 'Выбрано' : undefined}
-            subtitle={`${g.course} курс • ${g.departmentName}`}
-          >
-            {g.name}
-          </SimpleCell>
-        ))}
+        <div style={{ marginTop: 8 }}>
+          {filtered.map((g) => {
+            const isSelected = selectedGroup === g.name;
+            return (
+              <SimpleCell
+                key={g.id || g.name}
+                onClick={() => {
+                  triggerHaptic('medium');
+                  onSelectGroup(g.name);
+                  onClose();
+                }}
+                indicator={isSelected ? 'Выбрана' : undefined}
+                subtitle={`${g.course} курс • ${g.departmentName}`}
+                style={{
+                  backgroundColor: isSelected ? 'var(--vkui--color_background_secondary)' : undefined,
+                  borderRadius: 8,
+                }}
+              >
+                <span style={{ fontWeight: isSelected ? 700 : 500 }}>{g.name}</span>
+              </SimpleCell>
+            );
+          })}
+        </div>
       </Group>
     </ModalPage>
   );

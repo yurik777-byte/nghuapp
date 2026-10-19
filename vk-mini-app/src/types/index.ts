@@ -37,6 +37,9 @@ export interface RoomScheduleItem {
   subject: string;
   group: string;
   teacher: string;
+  date?: string;
+  dayOfWeek?: string;
+  pairNumber?: number;
 }
 
 export interface RoomItem {
@@ -46,6 +49,7 @@ export interface RoomItem {
   status: 'free' | 'occupied';
   currentLesson: RoomScheduleItem | null;
   nextLesson: RoomScheduleItem | null;
+  lastLesson?: RoomScheduleItem | null;
   schedule: RoomScheduleItem[];
 }
 

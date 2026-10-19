@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Panel,
-  PanelHeader,
   Search,
   Group,
   SimpleCell,
@@ -15,12 +14,33 @@ import {
 import { Icon28Users3Outline, Icon28WarningTriangleOutline } from '@vkontakte/icons';
 import { TeacherItem } from '../types';
 import { fetchTeachers } from '../api/client';
+import { AppHeader, AppTab } from '../components/AppHeader';
 
 const InitialsAvatar: React.FC<{ size?: number; children?: string }> = ({ size = 40, children }) => (
   <Avatar size={size} initials={children} gradientColor="blue" />
 );
 
-export const TeachersPanel: React.FC<{ id: string }> = ({ id }) => {
+interface TeachersPanelProps {
+  id: string;
+  isDesktop?: boolean;
+  activeTab?: AppTab;
+  onSelectTab?: (tab: AppTab) => void;
+  selectedGroup?: string;
+  onOpenGroupModal?: () => void;
+  colorScheme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
+}
+
+export const TeachersPanel: React.FC<TeachersPanelProps> = ({
+  id,
+  isDesktop = false,
+  activeTab = 'teachers',
+  onSelectTab = () => {},
+  selectedGroup = '',
+  onOpenGroupModal = () => {},
+  colorScheme = 'light',
+  onToggleTheme = () => {},
+}) => {
   const [teachers, setTeachers] = useState<TeacherItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -53,7 +73,17 @@ export const TeachersPanel: React.FC<{ id: string }> = ({ id }) => {
 
   return (
     <Panel id={id}>
-      <PanelHeader>Преподаватели</PanelHeader>
+      <AppHeader
+        isDesktop={isDesktop}
+        activeTab={activeTab}
+        onSelectTab={onSelectTab}
+        selectedGroup={selectedGroup}
+        onOpenGroupModal={onOpenGroupModal}
+        colorScheme={colorScheme}
+        onToggleTheme={onToggleTheme}
+        title="Преподаватели"
+      />
+
       <Group>
         {!hasError && (
           <Search
@@ -85,14 +115,14 @@ export const TeachersPanel: React.FC<{ id: string }> = ({ id }) => {
                   before={<InitialsAvatar size={40}>{t.name.slice(0, 2)}</InitialsAvatar>}
                   subtitle={t.subjects.join(', ')}
                 >
-                  {t.name}
+                  <span style={{ fontWeight: 600 }}>{t.name}</span>
                 </SimpleCell>
               </Accordion.Summary>
               <Accordion.Content>
                 <div style={{ padding: '8px 16px', background: 'var(--vkui--color_background_secondary)' }}>
                   {t.schedule && t.schedule.length > 0 ? (
                     t.schedule.map((item, idx) => (
-                      <Footnote key={idx} style={{ padding: '4px 0' }}>
+                      <Footnote key={idx} style={{ padding: '4px 0', borderBottom: '1px solid var(--vkui--color_separator_primary)' }}>
                         {item.dayOfWeek}, {item.pairNumber} пара ({item.timeStart}-{item.timeEnd}): <b>{item.subject}</b> (гр. {item.group}, каб. {item.room})
                       </Footnote>
                     ))
