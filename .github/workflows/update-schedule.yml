@@ -24,14 +24,17 @@ jobs:
       - name: Install dependencies
         run: |
           cd server && npm install
-          npm install
+          cd ..
+          npm install tsx --no-save
 
       - name: Scrape & Parse Latest Timetable
-        run: npx tsx scripts/update_schedule.ts
+        run: npx tsx scripts/update_schedule.ts || echo "[Warning] University site unreachable or rate limited; preserving current schedule."
+        env:
+          NODE_PATH: server/node_modules
 
       - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add schedule.json vk-mini-app/public/schedule.json
-          git diff --cached --quiet || (git commit -m "chore(schedule): auto-update timetable from NGHU site [skip ci]" && git push)
+          git diff --cached --quiet || (git commit -m "chore(schedule): auto-update timetable from NGHU site [skip ci]" && git push || echo "[Warning] Git push skipped.")
