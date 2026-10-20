@@ -10,6 +10,7 @@ import {
   SimpleCell,
   Banner,
   Placeholder,
+  Footnote,
 } from '@vkontakte/vkui';
 import { Icon28Users3Outline } from '@vkontakte/icons';
 import { GroupItem } from '../types';
@@ -150,6 +151,20 @@ export const GroupModal: React.FC<GroupModalProps> = ({
               Попробуйте ввести номер (например, 21) или специальность (например, живопись или дизайн).
             </Placeholder>
           )}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 18, marginBottom: 8, padding: '0 12px' }}>
+          <Footnote style={{ color: 'var(--vkui--color_text_tertiary)', fontSize: 12 }}>
+            Неофициальное студенческое приложение •{' '}
+            <a
+              href="./privacy.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--vkui--color_accent_blue)', textDecoration: 'none' }}
+            >
+              Конфиденциальность
+            </a>
+          </Footnote>
         </div>
       </Group>
     </ModalPage>

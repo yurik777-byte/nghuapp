@@ -4,6 +4,7 @@ dist.zip
 *.apk
 *.html
 !vk-mini-app/index.html
+!vk-mini-app/public/privacy.html
 *.pdf
 !schedule_sample.pdf
 .env.local
