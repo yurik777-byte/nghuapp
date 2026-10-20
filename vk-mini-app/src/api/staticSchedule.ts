@@ -164,6 +164,7 @@ export async function getStaticRooms(
     targetDate = availableDates[0];
   }
   const isToday = targetDate === todayStr;
+  const isCheckApplicable = Boolean(time) || isToday;
   const targetTime = time?.trim() || timeStr;
 
   const result: RoomItem[] = [];
@@ -181,12 +182,12 @@ export async function getStaticRooms(
     // Strictly the lessons for the target study day
     const dateLessons = sortedLessons.filter((l) => l.date === targetDate);
 
-    const currentRaw = isToday
+    const currentRaw = isCheckApplicable
       ? dateLessons.find((l) => targetTime >= l.timeStart && targetTime < l.timeEnd) || null
       : null;
 
     let nextRaw: RawLesson | null = null;
-    if (isToday) {
+    if (isCheckApplicable) {
       if (currentRaw) {
         nextRaw = dateLessons.find((l) => l.pairNumber > currentRaw.pairNumber) || null;
       } else {

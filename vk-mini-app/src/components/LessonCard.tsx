@@ -1,35 +1,13 @@
 import React from 'react';
 import { Card, Headline, Subhead, Footnote } from '@vkontakte/vkui';
 import { Lesson } from '../types';
+import { formatSubjectTitle } from '../utils/formatters';
+
+export { formatSubjectTitle };
 
 interface LessonCardProps {
   lesson: Lesson;
   isCurrent?: boolean;
-}
-
-export function formatSubjectTitle(subject: string): string {
-  if (!subject) return 'Занятие';
-  const clean = subject.trim();
-  const lower = clean.toLowerCase();
-
-  const MAP: Record<string, string> = {
-    'пластическая анат': 'Пластическая анатомия',
-    'пластическая анат.': 'Пластическая анатомия',
-    'ин.язык': 'Иностранный язык',
-    'ин. язык': 'Иностранный язык',
-    'естествознаяние': 'Естествознание',
-    'история тетра': 'История театра',
-    'худ.оформление спект': 'Художественное оформление спектакля',
-    'худ.оформление спектакля': 'Художественное оформление спектакля',
-    'имк': 'ИМК',
-    'сидп (вирт.мат.)': 'СИДП (Вирт. мат.)',
-    'физкультура динамо': 'Физкультура',
-    'поптд': 'ПОПТД (Правовые основы)',
-    'опг': 'ОПГ (Основы произв. графики)',
-    'анализ произв. изо': 'Анализ произведений ИЗО',
-  };
-
-  return MAP[lower] || clean;
 }
 
 export const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCurrent }) => {

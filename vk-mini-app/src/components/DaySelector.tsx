@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { HorizontalScroll, Tabs, TabsItem } from '@vkontakte/vkui';
 import { triggerHaptic } from '../utils/storage';
 
@@ -15,6 +15,19 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   onSelectDate,
   isDesktop = false,
 }) => {
+  const activeTabRef = useRef<HTMLElement | null>(null);
+
+  // Smoothly center the active day tab in the horizontal scroll list when selectedDate changes
+  useEffect(() => {
+    if (activeTabRef.current) {
+      activeTabRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [selectedDate]);
+
   const getShortDayName = (dayName: string) => {
     const map: Record<string, string> = {
       'Понедельник': 'ПН',
@@ -48,6 +61,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
             <TabsItem
               key={d.date}
               selected={isSelected}
+              getRootRef={isSelected ? (el) => { activeTabRef.current = el; } : undefined}
               onClick={() => {
                 triggerHaptic('light');
                 onSelectDate(d.date);

@@ -1,5 +1,6 @@
 :root {
   --vkui--color_accent_blue: #2688eb;
+  --vkui--safe_area_inset_bottom: env(safe-area-inset-bottom, 0px);
 }
 
 html, body {

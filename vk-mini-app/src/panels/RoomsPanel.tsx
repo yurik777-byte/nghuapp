@@ -378,6 +378,15 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
           <Placeholder icon={<Icon28DoorArrowRightOutline width={48} height={48} />} title="Аудитории не найдены" />
         )}
       </Group>
+
+      {/* Bottom spacer ensuring the last room card is completely clear of mobile Tabbar */}
+      <div
+        style={{
+          height: isDesktop ? 20 : 'calc(88px + var(--vkui--safe_area_inset_bottom, 0px))',
+          minHeight: isDesktop ? 20 : 88,
+        }}
+        aria-hidden="true"
+      />
     </Panel>
   );
 };

@@ -275,6 +275,15 @@ export const TeachersPanel: React.FC<TeachersPanelProps> = ({
           <Placeholder icon={<Icon28Users3Outline width={48} height={48} />} title="Преподаватели не найдены" />
         )}
       </Group>
+
+      {/* Bottom spacer ensuring the last teacher card is completely clear of mobile Tabbar */}
+      <div
+        style={{
+          height: isDesktop ? 20 : 'calc(88px + var(--vkui--safe_area_inset_bottom, 0px))',
+          minHeight: isDesktop ? 20 : 88,
+        }}
+        aria-hidden="true"
+      />
     </Panel>
   );
 };

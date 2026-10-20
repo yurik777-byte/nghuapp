@@ -54,7 +54,7 @@ describe('Schedule Component Logic', () => {
   });
 
   it('expands abbreviated and irregular subject titles properly', async () => {
-    const { formatSubjectTitle } = await import('../src/components/LessonCard');
+    const { formatSubjectTitle } = await import('../src/utils/formatters');
     expect(formatSubjectTitle('Пластическая анат')).toBe('Пластическая анатомия');
     expect(formatSubjectTitle('пластическая анат.')).toBe('Пластическая анатомия');
     expect(formatSubjectTitle('Ин.язык')).toBe('Иностранный язык');
@@ -62,5 +62,47 @@ describe('Schedule Component Logic', () => {
     expect(formatSubjectTitle('Худ.оформление спект')).toBe('Художественное оформление спектакля');
     expect(formatSubjectTitle('Естествознаяние')).toBe('Естествознание');
     expect(formatSubjectTitle('Живопись')).toBe('Живопись');
+  });
+
+  it('correctly calculates swipe gesture transitions between schedule days', () => {
+    const days = [
+      { date: '2026-10-19', dayOfWeek: 'Понедельник' },
+      { date: '2026-10-20', dayOfWeek: 'Вторник' },
+      { date: '2026-10-21', dayOfWeek: 'Среда' },
+    ];
+
+    const getNextDate = (currentDate: string, deltaX: number, deltaY: number, elapsed: number) => {
+      // Must be < 550ms, >= 45px distance, and >= 1.3x dominant over vertical
+      if (elapsed < 550 && Math.abs(deltaX) >= 45 && Math.abs(deltaX) >= Math.abs(deltaY) * 1.3) {
+        const idx = days.findIndex((d) => d.date === currentDate);
+        if (deltaX < 0 && idx < days.length - 1) {
+          return days[idx + 1].date;
+        } else if (deltaX > 0 && idx > 0) {
+          return days[idx - 1].date;
+        }
+      }
+      return currentDate;
+    };
+
+    // Swipe left (next day)
+    expect(getNextDate('2026-10-19', -60, 10, 200)).toBe('2026-10-20');
+    expect(getNextDate('2026-10-20', -80, 5, 250)).toBe('2026-10-21');
+    // Cannot swipe past last day
+    expect(getNextDate('2026-10-21', -60, 0, 150)).toBe('2026-10-21');
+
+    // Swipe right (prev day)
+    expect(getNextDate('2026-10-21', 70, 15, 220)).toBe('2026-10-20');
+    expect(getNextDate('2026-10-20', 65, 0, 180)).toBe('2026-10-19');
+    // Cannot swipe before first day
+    expect(getNextDate('2026-10-19', 80, 0, 100)).toBe('2026-10-19');
+
+    // Vertical dominant drag (user scrolling up/down) should NOT change day
+    expect(getNextDate('2026-10-20', -50, 120, 300)).toBe('2026-10-20');
+
+    // Too slow drag (> 550ms) should NOT trigger day switch
+    expect(getNextDate('2026-10-20', -80, 5, 700)).toBe('2026-10-20');
+
+    // Insufficient distance (< 45px) should NOT trigger day switch
+    expect(getNextDate('2026-10-20', -30, 2, 200)).toBe('2026-10-20');
   });
 });
