@@ -39,6 +39,15 @@ function normalizeSubject(subject, room, teacher) {
     t = 'Гертель Е.В.';
   }
 
+  // Fix Spartaka mention in subject
+  if (/Спар?така/i.test(s)) {
+    const spMatch = s.match(/Спар?така(?:[,\s]*([0-9а-яА-Я]+))?/i);
+    if (spMatch && spMatch[1] && !r) {
+      r = spMatch[1];
+    }
+    s = s.replace(/Спар?така(?:[,\s]*[0-9а-яА-Я]+)?/gi, '').trim();
+  }
+
   // Dictionary of known expansions
   const EXPANSIONS = {
     'пластическая анат': 'Пластическая анатомия',

@@ -260,9 +260,11 @@ export async function parsePdfBuffer(
       day2Date = metaRes.day2Date;
     }
 
-    // Identify group header columns at top row (y ≈ 509)
-    const headerItems = items
-      .filter((it) => it.y >= 505 && it.y <= 515 && /^[ЖДТ]-\d\d$/.test(it.str))
+    // Identify group header columns at top row (adaptive to page height / scaling)
+    const groupCandidateItems = items.filter((it) => /^[ЖДТ]-\d\d$/i.test(it.str));
+    const maxGroupY = groupCandidateItems.length > 0 ? Math.max(...groupCandidateItems.map((g) => g.y)) : 509;
+    const headerItems = groupCandidateItems
+      .filter((it) => Math.abs(it.y - maxGroupY) <= 12)
       .sort((a, b) => a.x - b.x);
 
     // Register groups
@@ -277,11 +279,15 @@ export async function parsePdfBuffer(
       }
     }
 
-    // Determine left and right boundaries of group columns
-    // Left time column ends at x=125 on Page 1, x=69 on Page 2
-    // Right time column starts at x=715 on Page 1, x=695 on Page 2
-    const leftTimeMaxX = pageNum === 1 ? 125 : 69;
-    const rightTimeMinX = pageNum === 1 ? 715 : 695;
+    // Determine left and right boundaries of group columns dynamically
+    const firstGroupX = headerItems[0]?.x || 130;
+    const lastGroupX = headerItems[headerItems.length - 1]?.x || 700;
+    const avgColWidth = headerItems.length > 1
+      ? (lastGroupX - firstGroupX) / (headerItems.length - 1)
+      : 70;
+
+    const leftTimeMaxX = firstGroupX - avgColWidth / 2;
+    const rightTimeMinX = lastGroupX + avgColWidth / 2;
 
     const cols: ColumnBoundary[] = headerItems.map((h, i) => {
       const minX = i === 0 ? leftTimeMaxX : (headerItems[i - 1].x + h.x) / 2;
@@ -293,7 +299,6 @@ export async function parsePdfBuffer(
     });
 
     // Dynamic time row detection (11 time rows per day)
-    const firstGroupX = headerItems[0]?.x || 130;
     const timeLabels = items
       .filter((it) => /^\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}\s*$/.test(it.str) && it.x < (firstGroupX - 5))
       .sort((a, b) => b.y - a.y);
@@ -308,10 +313,16 @@ export async function parsePdfBuffer(
 
     if (numDays > 0 && numDays !== 2) {
       // Dynamic day configuration (e.g. 6-day semester schedule)
-      const now = new Date();
-      const currentDay = now.getDay(); // 0 = Sun, 1 = Mon
-      const diffToMonday = currentDay === 0 ? 1 : 1 - currentDay;
-      const refMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+      let refMonday: Date;
+      if (day1Date) {
+        const [y, m, d] = day1Date.split('-').map(Number);
+        refMonday = new Date(y, m - 1, d);
+      } else {
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 = Sun, 1 = Mon
+        const diffToMonday = currentDay === 0 ? 1 : 1 - currentDay;
+        refMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+      }
 
       const RUSSIAN_DAY_TO_DOW: Record<string, number> = {
         'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6, 'воскресенье': 7,

@@ -64,8 +64,43 @@ export function parseWpfdJsonResponse(data: unknown): ScrapedTimetableLink {
     return { downloadUrl: null, title: null };
   }
 
-  // Sort files by ID descending (newest uploaded file first)
+  // Sort files by modified_time or date in title descending (newest schedule first)
+  const MONTHS_MAP: Record<string, number> = {
+    'янв': 1, 'фев': 2, 'мар': 3, 'апр': 4, 'май': 5, 'июн': 6,
+    'июл': 7, 'авг': 8, 'сен': 9, 'окт': 10, 'ноя': 11, 'дек': 12,
+  };
+
+  const getTitleDateVal = (title?: string) => {
+    if (!title) return 0;
+    const m = title.match(/(\d{1,2})\s+(янв|фев|мар|апр|май|июн|июл|авг|сен|окт|ноя|дек)[а-я]*/i);
+    if (m) {
+      const day = parseInt(m[1], 10);
+      const mon = MONTHS_MAP[m[2].toLowerCase()] || 1;
+      return mon * 100 + day;
+    }
+    const dMatch = title.match(/(\d{1,2})\.(\d{2})/);
+    if (dMatch) {
+      return parseInt(dMatch[2], 10) * 100 + parseInt(dMatch[1], 10);
+    }
+    return 0;
+  };
+
   pdfFiles.sort((a, b) => {
+    // 1. Check title date (e.g. "с 26 октября" > "с 1 октября")
+    const dateA = getTitleDateVal(a.post_title);
+    const dateB = getTitleDateVal(b.post_title);
+    if (dateA !== dateB) return dateB - dateA;
+
+    // 2. Check modified_time
+    if (a.modified_time && b.modified_time) {
+      const tA = new Date(a.modified_time).getTime();
+      const tB = new Date(b.modified_time).getTime();
+      if (!isNaN(tA) && !isNaN(tB) && tA !== tB) {
+        return tB - tA;
+      }
+    }
+
+    // 3. Fallback to ID
     const idA = typeof a.ID === 'number' ? a.ID : parseInt(String(a.ID), 10) || 0;
     const idB = typeof b.ID === 'number' ? b.ID : parseInt(String(b.ID), 10) || 0;
     return idB - idA;
