@@ -632,7 +632,7 @@
           "timeStart": "13:00",
           "timeEnd": "14:35",
           "subject": "Рисунок",
-          "teacher": "",
+          "teacher": "Барсуков Е.Г.",
           "room": "211б",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
@@ -692,7 +692,7 @@
           "timeStart": "13:00",
           "timeEnd": "14:35",
           "subject": "Рисунок",
-          "teacher": "",
+          "teacher": "Ивашкин А.В.",
           "room": "107",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
@@ -3385,11 +3385,11 @@
           "pairNumber": 1,
           "timeStart": "09:00",
           "timeEnd": "10:35",
-          "subject": "Литература 112 Гертель Е.В",
-          "teacher": "Коробейников А.С.",
-          "room": "212",
-          "building": "spartaka",
-          "buildingAddress": "ул. Спартака, 12"
+          "subject": "Литература",
+          "teacher": "Гертель Е.В.",
+          "room": "112",
+          "building": "main",
+          "buildingAddress": "Красный пр-т, 9"
         },
         {
           "id": "Ж-11_2026-11-05_2_212",
@@ -3397,11 +3397,11 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "История",
-          "teacher": "Семенова Е.Н.",
-          "room": "15",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "subject": "ОБЗР",
+          "teacher": "Коробейников А.С.",
+          "room": "212",
+          "building": "spartaka",
+          "buildingAddress": "ул. Спартака, 12"
         },
         {
           "id": "Ж-11_2026-11-05_3_116",
@@ -5024,8 +5024,8 @@
           "timeStart": "09:00",
           "timeEnd": "10:35",
           "subject": "Рисунок",
-          "teacher": "",
-          "room": "",
+          "teacher": "Чирва В.П.",
+          "room": "209",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
         },
@@ -5035,9 +5035,9 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "209 Ситникова Л.О",
+          "subject": "Рисунок",
           "teacher": "Чирва В.П.",
-          "room": "215",
+          "room": "209",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
         },
@@ -6014,7 +6014,7 @@
           "timeStart": "13:00",
           "timeEnd": "14:35",
           "subject": "Живопись",
-          "teacher": "",
+          "teacher": "Вальвачева Е.В.",
           "room": "205-206",
           "building": "main",
           "buildingAddress": "Красный пр-т, 9"
@@ -6182,10 +6182,10 @@
           "timeStart": "09:00",
           "timeEnd": "10:35",
           "subject": "Психология общения",
-          "teacher": "",
-          "room": "",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "teacher": "Литвиненко О.В.",
+          "room": "212",
+          "building": "spartaka",
+          "buildingAddress": "ул. Спартака, 12"
         },
         {
           "id": "Ж-41_2026-11-07_2_212",
@@ -6193,8 +6193,8 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "Литвиненко о.в",
-          "teacher": "",
+          "subject": "Психология общения",
+          "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -6218,10 +6218,10 @@
           "timeStart": "09:00",
           "timeEnd": "10:35",
           "subject": "Психология общения",
-          "teacher": "",
-          "room": "",
-          "building": "main",
-          "buildingAddress": "Красный пр-т, 9"
+          "teacher": "Литвиненко О.В.",
+          "room": "212",
+          "building": "spartaka",
+          "buildingAddress": "ул. Спартака, 12"
         },
         {
           "id": "Ж-42_2026-11-07_2_212",
@@ -6229,8 +6229,8 @@
           "pairNumber": 2,
           "timeStart": "10:40",
           "timeEnd": "12:15",
-          "subject": "Литвиненко о.в",
-          "teacher": "",
+          "subject": "Психология общения",
+          "teacher": "Литвиненко О.В.",
           "room": "212",
           "building": "spartaka",
           "buildingAddress": "ул. Спартака, 12"
@@ -6962,7 +6962,7 @@
       "timeStart": "13:00",
       "timeEnd": "14:35",
       "subject": "Рисунок",
-      "teacher": "",
+      "teacher": "Барсуков Е.Г.",
       "room": "211б",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
@@ -7032,7 +7032,7 @@
       "timeStart": "13:00",
       "timeEnd": "14:35",
       "subject": "Рисунок",
-      "teacher": "",
+      "teacher": "Ивашкин А.В.",
       "room": "107",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
@@ -8347,11 +8347,11 @@
       "pairNumber": 1,
       "timeStart": "09:00",
       "timeEnd": "10:35",
-      "subject": "Литература 112 Гертель Е.В",
-      "teacher": "Коробейников А.С.",
-      "room": "212",
-      "building": "spartaka",
-      "buildingAddress": "ул. Спартака, 12"
+      "subject": "Литература",
+      "teacher": "Гертель Е.В.",
+      "room": "112",
+      "building": "main",
+      "buildingAddress": "Красный пр-т, 9"
     },
     {
       "id": "Ж-11_2026-11-05_2_212",
@@ -8361,11 +8361,11 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "История",
-      "teacher": "Семенова Е.Н.",
-      "room": "15",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "subject": "ОБЗР",
+      "teacher": "Коробейников А.С.",
+      "room": "212",
+      "building": "spartaka",
+      "buildingAddress": "ул. Спартака, 12"
     },
     {
       "id": "Ж-11_2026-11-05_3_116",
@@ -12534,8 +12534,8 @@
       "timeStart": "09:00",
       "timeEnd": "10:35",
       "subject": "Рисунок",
-      "teacher": "",
-      "room": "",
+      "teacher": "Чирва В.П.",
+      "room": "209",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
     },
@@ -12547,9 +12547,9 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "209 Ситникова Л.О",
+      "subject": "Рисунок",
       "teacher": "Чирва В.П.",
-      "room": "215",
+      "room": "209",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
     },
@@ -13206,7 +13206,7 @@
       "timeStart": "13:00",
       "timeEnd": "14:35",
       "subject": "Живопись",
-      "teacher": "",
+      "teacher": "Вальвачева Е.В.",
       "room": "205-206",
       "building": "main",
       "buildingAddress": "Красный пр-т, 9"
@@ -13402,10 +13402,10 @@
       "timeStart": "09:00",
       "timeEnd": "10:35",
       "subject": "Психология общения",
-      "teacher": "",
-      "room": "",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "teacher": "Литвиненко О.В.",
+      "room": "212",
+      "building": "spartaka",
+      "buildingAddress": "ул. Спартака, 12"
     },
     {
       "id": "Ж-41_2026-11-07_2_212",
@@ -13415,8 +13415,8 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "Литвиненко о.в",
-      "teacher": "",
+      "subject": "Психология общения",
+      "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"
@@ -13444,10 +13444,10 @@
       "timeStart": "09:00",
       "timeEnd": "10:35",
       "subject": "Психология общения",
-      "teacher": "",
-      "room": "",
-      "building": "main",
-      "buildingAddress": "Красный пр-т, 9"
+      "teacher": "Литвиненко О.В.",
+      "room": "212",
+      "building": "spartaka",
+      "buildingAddress": "ул. Спартака, 12"
     },
     {
       "id": "Ж-42_2026-11-07_2_212",
@@ -13457,8 +13457,8 @@
       "pairNumber": 2,
       "timeStart": "10:40",
       "timeEnd": "12:15",
-      "subject": "Литвиненко о.в",
-      "teacher": "",
+      "subject": "Психология общения",
+      "teacher": "Литвиненко О.В.",
       "room": "212",
       "building": "spartaka",
       "buildingAddress": "ул. Спартака, 12"

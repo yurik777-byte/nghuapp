@@ -88,15 +88,87 @@ function processSchedule(filePath) {
   const data = JSON.parse(raw);
 
   const cleanedLessons = data.lessons.map((lesson) => {
-    // Special fix for Zh-11 Thursday Pair 2 (was misparsed as Pair 2 Literatura 111 Gertel)
-    if (lesson.group === 'Ж-11' && lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 2) {
+    // 1. Zh-11 Thursday Pair 1 (Literature) & Pair 2 (OBZR in 212)
+    if (lesson.group === 'Ж-11' && lesson.dayOfWeek === 'Четверг') {
+      if (lesson.pairNumber === 1) {
+        return {
+          ...lesson,
+          subject: 'Литература',
+          teacher: 'Гертель Е.В.',
+          room: '112',
+          building: 'main',
+          buildingAddress: 'Красный пр-т, 9',
+        };
+      }
+      if (lesson.pairNumber === 2) {
+        return {
+          ...lesson,
+          subject: 'ОБЗР',
+          teacher: 'Коробейников А.С.',
+          room: '212',
+          building: 'spartaka',
+          buildingAddress: 'ул. Спартака, 12',
+        };
+      }
+    }
+
+    // 2. D-23 Monday Pair 3 (Drawing with Barsukov in 211b)
+    if (lesson.group === 'Д-23' && lesson.dayOfWeek === 'Понедельник' && lesson.pairNumber === 3) {
       return {
         ...lesson,
-        subject: 'История',
-        teacher: 'Семенова Е.Н.',
-        room: '15',
+        subject: 'Рисунок',
+        teacher: 'Барсуков Е.Г.',
+        room: '211б',
         building: 'main',
         buildingAddress: 'Красный пр-т, 9',
+      };
+    }
+
+    // 3. D-24 Monday Pair 3 (Drawing with Ivashkin in 107)
+    if (lesson.group === 'Д-24' && lesson.dayOfWeek === 'Понедельник' && lesson.pairNumber === 3) {
+      return {
+        ...lesson,
+        subject: 'Рисунок',
+        teacher: 'Ивашкин А.В.',
+        room: '107',
+        building: 'main',
+        buildingAddress: 'Красный пр-т, 9',
+      };
+    }
+
+    // 4. D-31 Saturday Pair 3 (Painting with Valvacheva in 205-206)
+    if (lesson.group === 'Д-31' && lesson.dayOfWeek === 'Суббота' && lesson.pairNumber === 3) {
+      return {
+        ...lesson,
+        subject: 'Живопись',
+        teacher: 'Вальвачева Е.В.',
+        room: '205-206',
+        building: 'main',
+        buildingAddress: 'Красный пр-т, 9',
+      };
+    }
+
+    // 5. Zh-32 Friday Pairs 1 & 2 (Drawing block with Chirva in 209)
+    if (lesson.group === 'Ж-32' && lesson.dayOfWeek === 'Пятница' && (lesson.pairNumber === 1 || lesson.pairNumber === 2)) {
+      return {
+        ...lesson,
+        subject: 'Рисунок',
+        teacher: 'Чирва В.П.',
+        room: '209',
+        building: 'main',
+        buildingAddress: 'Красный пр-т, 9',
+      };
+    }
+
+    // 6. Zh-41 & Zh-42 Saturday Pairs 1 & 2 (Psychology stream lecture in 212 with Litvinenko)
+    if ((lesson.group === 'Ж-41' || lesson.group === 'Ж-42') && lesson.dayOfWeek === 'Суббота' && (lesson.pairNumber === 1 || lesson.pairNumber === 2)) {
+      return {
+        ...lesson,
+        subject: 'Психология общения',
+        teacher: 'Литвиненко О.В.',
+        room: '212',
+        building: 'spartaka',
+        buildingAddress: 'ул. Спартака, 12',
       };
     }
 
