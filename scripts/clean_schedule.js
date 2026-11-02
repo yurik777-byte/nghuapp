@@ -26,6 +26,11 @@ function normalizeSubject(subject, room, teacher) {
     s = 'ОБЗР';
   }
 
+  // Fix POPTD Litvinenko
+  if (!s && t.includes('Литвиненко') && (r === '212' || r === '216')) {
+    s = 'ПОПТД (Правовые основы)';
+  }
+
   // Fix BZhD
   if (s.includes('БЖД') && s.includes('Коробейников')) {
     s = 'БЖД';
