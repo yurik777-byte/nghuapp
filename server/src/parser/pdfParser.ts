@@ -44,7 +44,7 @@ const PAIR_TIMES: Record<number, { start: string; end: string }> = {
   5: { start: '16:20', end: '17:55' },
 };
 
-const TEACHER_REGEX = /([А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.?)/u;
+const TEACHER_REGEX = /([А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s*[А-ЯЁа-яё]\.\s*[А-ЯЁа-яё]\.?)/u;
 const SPARTAKA_REGEX = /Спар?така,\s*12(?:\s*№\s*([0-9а-яА-Я]+))?/iu;
 const ROOM_REGEX = /(?:^|\s)(?:№\s*)?(\d{2,3}(?:-\d{2,3})?[а-яА-Я]?|УМО)(?=\s|$)/u;
 
@@ -124,7 +124,9 @@ function parseCellData(items: RawItem[]): {
     }
     const tm = line.match(TEACHER_REGEX);
     if (tm) {
-      teacher = tm[1].trim();
+      teacher = tm[1].trim().replace(/([А-ЯЁа-яё]+)\s*([А-ЯЁа-яё])\.\s*([А-ЯЁа-яё])\.?/u, (_m, s, i1, i2) => {
+        return `${s} ${i1.toUpperCase()}.${i2.toUpperCase()}.`;
+      });
     }
   }
 
