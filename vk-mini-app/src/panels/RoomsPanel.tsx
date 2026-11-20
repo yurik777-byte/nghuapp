@@ -59,7 +59,8 @@ export const RoomsPanel: React.FC<RoomsPanelProps> = ({
           setDays(daysList);
           const today = getLocalDateString();
           if (!daysList.some((d) => d.date === today)) {
-            setSelectedDate(daysList[0].date);
+            const nextDay = daysList.find((d) => d.date >= today);
+            setSelectedDate(nextDay ? nextDay.date : daysList[0].date);
           }
         }
       })

@@ -42,6 +42,38 @@ export interface FetchScheduleOptions {
   preferWpfdApi?: boolean;
 }
 
+const MONTHS_MAP: Record<string, number> = {
+  'янв': 1, 'фев': 2, 'мар': 3, 'апр': 4, 'май': 5, 'мая': 5, 'июн': 6,
+  'июл': 7, 'авг': 8, 'сен': 9, 'окт': 10, 'ноя': 11, 'дек': 12,
+};
+
+function getTitleDateVal(title?: string | null, modifiedTime?: string): number {
+  if (!title) return 0;
+
+  let fallbackYear = new Date().getFullYear();
+  if (modifiedTime) {
+    const modYear = new Date(modifiedTime).getFullYear();
+    if (!isNaN(modYear)) fallbackYear = modYear;
+  }
+  const yearMatch = title.match(/(?:^|[^\d])(20\d{2})(?=[^\d]|$)/);
+  const year = yearMatch ? parseInt(yearMatch[1], 10) : fallbackYear;
+
+  const m = title.match(
+    /(\d{1,2})\s+(янв|фев|мар|апр|ма[йя]|июн|июл|авг|сен|окт|ноя|дек)[а-яё]*/i
+  );
+  if (m) {
+    const day = parseInt(m[1], 10);
+    const mon = MONTHS_MAP[m[2].toLowerCase()] || 1;
+    return year * 10000 + mon * 100 + day;
+  }
+  const dMatch = title.match(/(\d{1,2})\.(\d{2})(?:\.(20\d{2}))?/);
+  if (dMatch) {
+    const dYear = dMatch[3] ? parseInt(dMatch[3], 10) : year;
+    return dYear * 10000 + parseInt(dMatch[2], 10) * 100 + parseInt(dMatch[1], 10);
+  }
+  return 0;
+}
+
 /**
  * Parses WP File Download AJAX JSON response and finds the latest PDF timetable link
  */
@@ -64,31 +96,11 @@ export function parseWpfdJsonResponse(data: unknown): ScrapedTimetableLink {
     return { downloadUrl: null, title: null };
   }
 
-  // Sort files by modified_time or date in title descending (newest schedule first)
-  const MONTHS_MAP: Record<string, number> = {
-    'янв': 1, 'фев': 2, 'мар': 3, 'апр': 4, 'май': 5, 'июн': 6,
-    'июл': 7, 'авг': 8, 'сен': 9, 'окт': 10, 'ноя': 11, 'дек': 12,
-  };
-
-  const getTitleDateVal = (title?: string) => {
-    if (!title) return 0;
-    const m = title.match(/(\d{1,2})\s+(янв|фев|мар|апр|май|июн|июл|авг|сен|окт|ноя|дек)[а-я]*/i);
-    if (m) {
-      const day = parseInt(m[1], 10);
-      const mon = MONTHS_MAP[m[2].toLowerCase()] || 1;
-      return mon * 100 + day;
-    }
-    const dMatch = title.match(/(\d{1,2})\.(\d{2})/);
-    if (dMatch) {
-      return parseInt(dMatch[2], 10) * 100 + parseInt(dMatch[1], 10);
-    }
-    return 0;
-  };
-
+  // Sort files by date in title (including year) or modified_time descending (newest schedule first)
   pdfFiles.sort((a, b) => {
-    // 1. Check title date (e.g. "с 26 октября" > "с 1 октября")
-    const dateA = getTitleDateVal(a.post_title);
-    const dateB = getTitleDateVal(b.post_title);
+    // 1. Check title date (e.g. "с 11 января 2027" > "с 21 декабря 2026")
+    const dateA = getTitleDateVal(a.post_title, a.modified_time);
+    const dateB = getTitleDateVal(b.post_title, b.modified_time);
     if (dateA !== dateB) return dateB - dateA;
 
     // 2. Check modified_time
@@ -150,8 +162,8 @@ export async function fetchLatestViaWpfdApi(
  */
 export function parseTimetablePageHtml(html: string): ScrapedTimetableLink {
   const $ = cheerio.load(html);
-  let downloadUrl: string | null = null;
-  let title: string | null = null;
+  const primaryCandidates: { downloadUrl: string; title: string; score: number }[] = [];
+  const fallbackCandidates: { downloadUrl: string; title: string; score: number }[] = [];
 
   $('a').each((_, el) => {
     const href = $(el).attr('href') || '';
@@ -164,30 +176,43 @@ export function parseTimetablePageHtml(html: string): ScrapedTimetableLink {
       href.includes('wpfd');
     const isScheduleText = /расписание\s+занятий/i.test(text);
 
-    if ((isPdfLink && isScheduleText) || (/расписание.*(\d{1,2}[.-]\d{1,2}|\d{1,2}\s+[а-я]+)/i.test(text) && isPdfLink)) {
-      if (!downloadUrl) {
-        downloadUrl = href.startsWith('http') ? href : new URL(href, NGHU_TIMETABLE_PAGE_URL).href;
-        title = text;
-      }
+    if (
+      (isPdfLink && isScheduleText) ||
+      (/расписание.*(\d{1,2}[.-]\d{1,2}|\d{1,2}\s+[а-яё]+)/i.test(text) && isPdfLink)
+    ) {
+      const downloadUrl = href.startsWith('http')
+        ? href
+        : new URL(href, NGHU_TIMETABLE_PAGE_URL).href;
+      primaryCandidates.push({
+        downloadUrl,
+        title: text,
+        score: getTitleDateVal(text),
+      });
+    } else if (/расписание.*(студент|занятий)/i.test(text) && isPdfLink) {
+      const downloadUrl = href.startsWith('http')
+        ? href
+        : new URL(href, NGHU_TIMETABLE_PAGE_URL).href;
+      fallbackCandidates.push({
+        downloadUrl,
+        title: text,
+        score: getTitleDateVal(text),
+      });
     }
   });
 
-  // Fallback: search for any link mentioning 'расписание' if not matched yet
-  if (!downloadUrl) {
-    $('a').each((_, el) => {
-      const href = $(el).attr('href') || '';
-      const text = $(el).text().trim();
-      if (
-        /расписание.*(студент|занятий)/i.test(text) &&
-        (href.includes('.pdf') || href.includes('/dl/') || href.includes('wpfd'))
-      ) {
-        downloadUrl = href.startsWith('http') ? href : new URL(href, NGHU_TIMETABLE_PAGE_URL).href;
-        title = text;
-      }
-    });
+  const candidates = primaryCandidates.length > 0 ? primaryCandidates : fallbackCandidates;
+  if (candidates.length === 0) {
+    return { downloadUrl: null, title: null };
   }
 
-  return { downloadUrl, title };
+  let best = candidates[0];
+  for (let i = 1; i < candidates.length; i++) {
+    if (candidates[i].score > best.score) {
+      best = candidates[i];
+    }
+  }
+
+  return { downloadUrl: best.downloadUrl, title: best.title };
 }
 
 /**
@@ -266,7 +291,11 @@ export async function fetchLatestSchedule(
       if (pdfRes.ok) {
         const arrayBuf = await pdfRes.arrayBuffer();
         const buffer = Buffer.from(arrayBuf);
-        const parsed = await parsePdfBuffer(buffer, scraped.downloadUrl);
+        const parsed = await parsePdfBuffer(
+          buffer,
+          scraped.downloadUrl,
+          scraped.title || undefined
+        );
         if (scraped.title && !parsed.meta.sourceFileTitle) {
           parsed.meta.sourceFileTitle = scraped.title;
         }

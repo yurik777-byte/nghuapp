@@ -33,8 +33,29 @@ jobs:
           NODE_PATH: server/node_modules
 
       - name: Commit and push if changed
+        id: commit
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add schedule.json vk-mini-app/public/schedule.json
-          git diff --cached --quiet || (git commit -m "chore(schedule): auto-update timetable from NGHU site [skip ci]" && git push || echo "[Warning] Git push skipped.")
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(schedule): auto-update timetable from NGHU site [skip ci]"
+            git push || echo "[Warning] Git push skipped."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build VK Mini App
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          cd vk-mini-app
+          npm ci
+          npm run build
+
+      - name: Deploy to gh-pages branch
+        if: steps.commit.outputs.changed == 'true'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: vk-mini-app/dist
+          branch: gh-pages

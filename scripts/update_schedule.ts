@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fetchLatestSchedule } from '../server/src/parser/scraper.js';
+import { validateScheduleIntegrity } from '../server/src/parser/pdfParser.js';
 
 async function main() {
   console.log('[Updater] Checking NGHU site for the latest timetable...');
@@ -13,6 +14,18 @@ async function main() {
 
     console.log(`[Updater] Parsed: ${schedule.meta.sourceFileTitle || 'Timetable'}`);
     console.log(`[Updater] Total groups: ${schedule.groups.length}, total lessons: ${schedule.lessons.length}`);
+
+    const report = validateScheduleIntegrity(schedule);
+    if (report.isValid) {
+      console.log(`[Updater] Integrity validation: OK (${report.warnings.length} warnings)`);
+    } else {
+      console.warn(
+        `[Updater] Integrity validation: ${report.warnings.length} warnings (incomplete=${report.incompleteLessonCount}, multiTeacher=${report.multiTeacherCount}, typos=${report.typoCount})`
+      );
+      for (const w of report.warnings.slice(0, 10)) {
+        console.warn(`  - ${w}`);
+      }
+    }
 
     const jsonStr = JSON.stringify(schedule, null, 2);
 

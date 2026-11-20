@@ -11,6 +11,131 @@ import {
   TimetableMeta,
 } from '../types/index.js';
 import { fetchLatestSchedule } from '../parser/scraper.js';
+import {
+  addCalendarDays,
+  getDayOfWeekFromDate,
+  getIsoDayOfWeek,
+} from '../parser/pdfParser.js';
+
+export interface ProjectScheduleOptions {
+  now?: Date;
+  weeks: number;
+  includeDate?: string;
+}
+
+function formatLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function isRecurringSchedule(schedule: ParsedSchedule): boolean {
+  if (schedule.meta?.isRecurring === true) return true;
+  if (schedule.meta?.isRecurring === false) return false;
+  return (
+    schedule.days.length === 6 &&
+    /(?:^|[^\p{L}])с\s+\d/iu.test(schedule.meta?.sourceFileTitle || '')
+  );
+}
+
+export function projectRecurringSchedule(
+  schedule: ParsedSchedule,
+  options: ProjectScheduleOptions
+): ParsedSchedule {
+  if (!schedule.days || schedule.days.length === 0 || !isRecurringSchedule(schedule)) {
+    return schedule;
+  }
+
+  const sortedDays = [...schedule.days].sort((a, b) => a.date.localeCompare(b.date));
+  const effectiveFrom = schedule.meta?.effectiveFrom || sortedDays[0].date;
+
+  const templateByDow = new Map<number, { templateDate: string; day: ScheduleDay }>();
+  for (const day of sortedDays) {
+    const dow = getIsoDayOfWeek(day.date);
+    if (dow >= 1 && dow <= 6 && !templateByDow.has(dow)) {
+      templateByDow.set(dow, { templateDate: day.date, day });
+    }
+  }
+
+  if (templateByDow.size === 0) {
+    return schedule;
+  }
+
+  const now = options.now || new Date();
+  const todayStr = formatLocalDate(now);
+  const todayDow = getIsoDayOfWeek(todayStr);
+  const todayWeekMonday =
+    todayDow === 7
+      ? addCalendarDays(todayStr, 1)
+      : addCalendarDays(todayStr, -(todayDow - 1));
+
+  const effectiveDow = getIsoDayOfWeek(effectiveFrom);
+  const effectiveWeekMonday = addCalendarDays(effectiveFrom, -(effectiveDow - 1));
+  const startMonday =
+    todayWeekMonday >= effectiveWeekMonday ? todayWeekMonday : effectiveWeekMonday;
+
+  const targetDates: string[] = [];
+  const seenDates = new Set<string>();
+
+  for (let w = 0; w < options.weeks; w++) {
+    for (let d = 0; d < 6; d++) {
+      const dateStr = addCalendarDays(startMonday, w * 7 + d);
+      if (dateStr < effectiveFrom) continue;
+      if (!templateByDow.has(d + 1)) continue;
+      if (!seenDates.has(dateStr)) {
+        seenDates.add(dateStr);
+        targetDates.push(dateStr);
+      }
+    }
+  }
+
+  const includeDate = options.includeDate?.trim();
+  if (
+    includeDate &&
+    /^\d{4}-\d{2}-\d{2}$/.test(includeDate) &&
+    includeDate >= effectiveFrom &&
+    !seenDates.has(includeDate)
+  ) {
+    const incDow = getIsoDayOfWeek(includeDate);
+    if (incDow >= 1 && incDow <= 6 && templateByDow.has(incDow)) {
+      seenDates.add(includeDate);
+      targetDates.push(includeDate);
+    }
+  }
+
+  targetDates.sort((a, b) => a.localeCompare(b));
+
+  const projectedDays: ScheduleDay[] = [];
+  const projectedLessons: Lesson[] = [];
+
+  for (const dateStr of targetDates) {
+    const dow = getIsoDayOfWeek(dateStr);
+    const tpl = templateByDow.get(dow);
+    if (!tpl) continue;
+
+    const dayOfWeek = getDayOfWeekFromDate(dateStr);
+    const clonedLessons: Lesson[] = tpl.day.lessons.map((l) => ({
+      ...l,
+      date: dateStr,
+      dayOfWeek,
+      id: l.id ? l.id.replace(tpl.templateDate, dateStr) : l.id,
+    }));
+
+    projectedDays.push({
+      date: dateStr,
+      dayOfWeek,
+      lessons: clonedLessons,
+    });
+    projectedLessons.push(...clonedLessons);
+  }
+
+  return {
+    ...schedule,
+    days: projectedDays,
+    lessons: projectedLessons,
+  };
+}
 
 export interface ScheduleFilter {
   group?: string;
@@ -90,7 +215,11 @@ export class ScheduleService {
   public async getSchedule(
     filter?: ScheduleFilter
   ): Promise<{ meta: TimetableMeta; days: ScheduleDay[] }> {
-    const schedule = await this.init();
+    const rawSchedule = await this.init();
+    const schedule = projectRecurringSchedule(rawSchedule, {
+      weeks: 2,
+      includeDate: filter?.date,
+    });
     let days = schedule.days.map((day) => ({
       date: day.date,
       dayOfWeek: day.dayOfWeek,
@@ -124,7 +253,11 @@ export class ScheduleService {
   }
 
   public async getRooms(filter?: RoomFilter): Promise<(RoomOccupancy & { roomNumber: string; schedule: Lesson[] })[]> {
-    const schedule = await this.init();
+    const rawSchedule = await this.init();
+    const schedule = projectRecurringSchedule(rawSchedule, {
+      weeks: 2,
+      includeDate: filter?.date,
+    });
     const allLessons = schedule.lessons;
 
     // Group distinct rooms by building and room code
@@ -214,7 +347,8 @@ export class ScheduleService {
   }
 
   public async getTeachers(nameFilter?: string): Promise<(TeacherSchedule & { name: string })[]> {
-    const schedule = await this.init();
+    const rawSchedule = await this.init();
+    const schedule = projectRecurringSchedule(rawSchedule, { weeks: 1 });
     const allLessons = schedule.lessons;
 
     // Group lessons by teacher

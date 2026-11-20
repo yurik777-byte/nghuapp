@@ -1,14 +1,32 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-function normalizeSubject(subject, room, teacher) {
-  let s = (subject || '').trim();
+const EXPANSIONS = {
+  'пластическая анат': 'Пластическая анатомия',
+  'пластическая анат.': 'Пластическая анатомия',
+  'ин.язык': 'Иностранный язык',
+  'ин. язык': 'Иностранный язык',
+  'естествознаяние': 'Естествознание',
+  'история тетра': 'История театра',
+  'худ.оформление спект': 'Художественное оформление спектакля',
+  'худ.оформление спектакля': 'Художественное оформление спектакля',
+  'имк': 'ИМК',
+  'сидп (вирт.мат.)': 'СИДП (Вирт. мат.)',
+  'поптд': 'ПОПТД (Правовые основы)',
+  'опг': 'ОПГ (Основы произв. графики)',
+  'анализ произв. изо': 'Анализ произведений ИЗО',
+};
+
+function normalizeSubject(subject, room, teacher, building, buildingAddress) {
+  let s = (subject || '').replace(/\+[A-Z]{1,3}\d+:[A-Z]{1,3}\d+/g, '').replace(/\s+/g, ' ').trim();
   let r = (room || '').trim();
   let t = (teacher || '').trim();
+  let b = building || 'main';
+  let addr = buildingAddress || (b === 'spartaka' ? 'ул. Спартака, 12' : 'Красный пр-т, 9');
 
   // Fix Dinamo / PE
   if (/динамо/i.test(s)) {
-    s = s.replace(/динамо/gi, '').trim();
+    s = s.replace(/динамо/gi, '').replace(/\s+/g, ' ').trim();
     if (!r) r = 'Динамо';
   }
   if (!s && r === 'Динамо') {
@@ -42,29 +60,22 @@ function normalizeSubject(subject, room, teacher) {
 
   // Fix Spartaka mention in subject
   if (/Спар?така/i.test(s)) {
-    const spMatch = s.match(/Спар?така(?:[,\s]*([0-9а-яА-Я]+))?/i);
+    const spMatch = s.match(/Спар?така(?:,?\s*12(?![0-9]))?(?:\s*,?\s*(?:№\s*)?([0-9а-яА-Я]+))?/i);
     if (spMatch && spMatch[1] && !r) {
       r = spMatch[1];
     }
-    s = s.replace(/Спар?така(?:[,\s]*[0-9а-яА-Я]+)?/gi, '').trim();
+    s = s
+      .replace(/Спар?така(?:,?\s*12(?![0-9]))?(?:\s*,?\s*(?:№\s*)?[0-9а-яА-Я]+)?/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    b = 'spartaka';
+    addr = 'ул. Спартака, 12';
   }
 
-  // Dictionary of known expansions
-  const EXPANSIONS = {
-    'пластическая анат': 'Пластическая анатомия',
-    'пластическая анат.': 'Пластическая анатомия',
-    'ин.язык': 'Иностранный язык',
-    'ин. язык': 'Иностранный язык',
-    'естествознаяние': 'Естествознание',
-    'история тетра': 'История театра',
-    'худ.оформление спект': 'Художественное оформление спектакля',
-    'худ.оформление спектакля': 'Художественное оформление спектакля',
-    'имк': 'ИМК',
-    'сидп (вирт.мат.)': 'СИДП (Вирт. мат.)',
-    'поптд': 'ПОПТД (Правовые основы)',
-    'опг': 'ОПГ (Основы произв. графики)',
-    'анализ произв. изо': 'Анализ произведений ИЗО',
-  };
+  if (['215', '216', '217'].includes(r)) {
+    b = 'spartaka';
+    addr = 'ул. Спартака, 12';
+  }
 
   const lower = s.toLowerCase();
   if (EXPANSIONS[lower]) {
@@ -77,7 +88,7 @@ function normalizeSubject(subject, room, teacher) {
   if (t === 'Литвиненко о.в' || t === 'Литвиненко о.в.') t = 'Литвиненко О.В.';
   if (t === 'КоробейниковА.С' || t === 'КоробейниковА.С.') t = 'Коробейников А.С.';
 
-  return { subject: s, room: r, teacher: t };
+  return { subject: s, room: r, teacher: t, building: b, buildingAddress: addr };
 }
 
 function processSchedule(filePath) {
@@ -86,149 +97,25 @@ function processSchedule(filePath) {
   const data = JSON.parse(raw);
 
   const cleanedLessons = data.lessons.map((lesson) => {
-    // 1. D-13 Tuesday Pairs 1 & 2 (Painting 4-hour block with Nikolaenko in 217 Spartaka)
-    if (lesson.group === 'Д-13' && lesson.dayOfWeek === 'Вторник' && (lesson.pairNumber === 1 || lesson.pairNumber === 2)) {
-      return {
-        ...lesson,
-        subject: 'Живопись',
-        teacher: 'Николаенко О.Н.',
-        room: '217',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    // 2. Zh-11 Thursday Pairs 1 & 2 (Literature in 112 / OBZR in 212)
-    if (lesson.group === 'Ж-11' && lesson.dayOfWeek === 'Четверг') {
-      if (lesson.pairNumber === 1) {
-        return {
-          ...lesson,
-          subject: 'Литература',
-          teacher: 'Гертель Е.В.',
-          room: '112',
-          building: 'main',
-          buildingAddress: 'Красный пр-т, 9',
-        };
-      }
-      if (lesson.pairNumber === 2) {
-        return {
-          ...lesson,
-          subject: 'ОБЗР',
-          teacher: 'Коробейников А.С.',
-          room: '212',
-          building: 'spartaka',
-          buildingAddress: 'ул. Спартака, 12',
-        };
-      }
-    }
-
-    // 3. D-11 Thursday Pair 1 (OBZR in 212 with Korobeynikov)
-    if (lesson.group === 'Д-11' && lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 1) {
-      return {
-        ...lesson,
-        subject: 'ОБЗР',
-        teacher: 'Коробейников А.С.',
-        room: '212',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    // 4. D-13 Thursday Pair 3 (OBZR in 212 with Korobeynikov)
-    if (lesson.group === 'Д-13' && lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 3) {
-      return {
-        ...lesson,
-        subject: 'ОБЗР',
-        teacher: 'Коробейников А.С.',
-        room: '212',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    // 5. Zh-12 Saturday Pair 2 (Painting Valvacheva in 205-206)
-    if (lesson.group === 'Ж-12' && lesson.dayOfWeek === 'Суббота' && lesson.pairNumber === 2) {
-      return {
-        ...lesson,
-        subject: 'Живопись',
-        teacher: 'Вальвачева Е.В.',
-        room: '205-206',
-        building: 'main',
-        buildingAddress: 'Красный пр-т, 9',
-      };
-    }
-
-    // 6. Zh-32 Friday Pairs 1 & 2 (Drawing block Chirva in 209)
-    if (lesson.group === 'Ж-32' && lesson.dayOfWeek === 'Пятница' && (lesson.pairNumber === 1 || lesson.pairNumber === 2)) {
-      return {
-        ...lesson,
-        subject: 'Рисунок',
-        teacher: 'Чирва В.П.',
-        room: '209',
-        building: 'main',
-        buildingAddress: 'Красный пр-т, 9',
-      };
-    }
-
-    // 7. Zh-41 & Zh-42 Saturday Pairs 1 & 2 (Psychology stream lecture in 212 with Litvinenko)
-    if ((lesson.group === 'Ж-41' || lesson.group === 'Ж-42') && lesson.dayOfWeek === 'Суббота' && (lesson.pairNumber === 1 || lesson.pairNumber === 2)) {
-      return {
-        ...lesson,
-        subject: 'Психология общения',
-        teacher: 'Литвиненко О.В.',
-        room: '212',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    // 8. Course 3 stream lecture BZhD Thursday Pair 5 (D-31..D-34)
-    if (lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 5 && (lesson.group === 'Д-31' || lesson.group === 'Д-34')) {
-      return {
-        ...lesson,
-        subject: 'БЖД',
-        teacher: 'Коробейников А.С.',
-        room: '212',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    // 9. T-31 Thursday Pair 4 (BZhD in 212 with Korobeynikov)
-    if (lesson.group === 'Т-31' && lesson.dayOfWeek === 'Четверг' && lesson.pairNumber === 4) {
-      return {
-        ...lesson,
-        subject: 'БЖД',
-        teacher: 'Коробейников А.С.',
-        room: '212',
-        building: 'spartaka',
-        buildingAddress: 'ул. Спартака, 12',
-      };
-    }
-
-    const { subject, room, teacher } = normalizeSubject(lesson.subject, lesson.room, lesson.teacher);
-    let building = lesson.building;
-    let buildingAddress = lesson.buildingAddress;
-
-    if (room === '212' || room === '215' || room === '216' || room === '217') {
-      building = 'spartaka';
-      buildingAddress = 'ул. Спартака, 12';
-    } else {
-      building = 'main';
-      buildingAddress = 'Красный пр-т, 9';
-    }
+    const normalized = normalizeSubject(
+      lesson.subject,
+      lesson.room,
+      lesson.teacher,
+      lesson.building,
+      lesson.buildingAddress
+    );
 
     return {
       ...lesson,
-      subject,
-      room,
-      teacher,
-      building,
-      buildingAddress,
+      subject: normalized.subject,
+      room: normalized.room,
+      teacher: normalized.teacher,
+      building: normalized.building,
+      buildingAddress: normalized.buildingAddress,
     };
   });
 
-  // Rebuild days grouping
+  // Rebuild days grouping preserving date, dayOfWeek, building, buildingAddress
   const daysMap = new Map();
   for (const l of cleanedLessons) {
     if (!daysMap.has(l.date)) {
@@ -238,9 +125,7 @@ function processSchedule(filePath) {
         lessons: [],
       });
     }
-    const dayObj = daysMap.get(l.date);
-    const { date: _, dayOfWeek: __, ...lessonWithoutDay } = l;
-    dayObj.lessons.push(lessonWithoutDay);
+    daysMap.get(l.date).lessons.push({ ...l });
   }
 
   const days = Array.from(daysMap.values()).sort((a, b) => a.date.localeCompare(b.date));

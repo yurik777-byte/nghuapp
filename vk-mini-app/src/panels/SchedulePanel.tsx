@@ -39,28 +39,35 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({
   const [hasError, setHasError] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceRefresh = false) => {
     if (!selectedGroup) {
       setLoading(false);
       return;
     }
 
+    const pickValidDate = (daysList: { date: string }[]) => {
+      if (daysList.length > 0 && !daysList.some((d) => d.date === selectedDate)) {
+        const today = getLocalDateString();
+        const nextDay = daysList.find((d) => d.date >= today);
+        setSelectedDate(nextDay ? nextDay.date : daysList[0].date);
+      }
+    };
+
     try {
       setLoading(true);
       setHasError(false);
-      const data = await fetchSchedule(selectedGroup);
+      const data = await fetchSchedule(selectedGroup, undefined, forceRefresh);
       setSchedule(data);
       cacheSchedule(selectedGroup, data);
       setIsOffline(false);
-      if (data.days.length > 0 && !data.days.some((d) => d.date === selectedDate)) {
-        setSelectedDate(data.days[0].date);
-      }
+      pickValidDate(data.days);
     } catch (err) {
       console.warn('Network error, falling back to cache', err);
       const cached = getCachedSchedule(selectedGroup);
       if (cached) {
         setSchedule(cached);
         setIsOffline(true);
+        pickValidDate(cached.days || []);
       } else {
         setSchedule(null);
         setHasError(true);
@@ -176,7 +183,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({
         title="Расписание"
       />
 
-      <PullToRefresh onRefresh={loadData} isFetching={loading}>
+      <PullToRefresh onRefresh={() => loadData(true)} isFetching={loading}>
         {isOffline && (
           <Banner
             mode="tint"
@@ -233,7 +240,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({
                     icon={<Icon28WarningTriangleOutline width={48} height={48} />}
                     title="Не удалось загрузить расписание"
                     action={
-                      <Button size="m" mode="primary" onClick={loadData}>
+                      <Button size="m" mode="primary" onClick={() => loadData(true)}>
                         Повторить попытку
                       </Button>
                     }
@@ -245,7 +252,8 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({
                     const isCurrent =
                       isTodaySelected &&
                       liveStatus.type === 'lesson' &&
-                      liveStatus.currentLesson?.pairNumber === lesson.pairNumber;
+                      liveStatus.currentLesson?.pairNumber === lesson.pairNumber &&
+                      liveStatus.currentLesson?.timeStart === lesson.timeStart;
                     const next = currentLessons[idx + 1];
                     let breakMins = 0;
                     if (next) {

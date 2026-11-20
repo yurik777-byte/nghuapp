@@ -14,6 +14,8 @@ export interface TimetableMeta {
   sourceFileTitle?: string; // e.g. "Расписание занятий на 04/05.09.2026 г."
   period?: string; // e.g. "04/05.09.2026"
   semester?: string; // e.g. "1 семестр 2026-2027"
+  effectiveFrom?: string; // Canonical start date "YYYY-MM-DD"
+  isRecurring?: boolean; // true for "с DD.MM.YYYY" recurring weekly schedules
 }
 
 /**

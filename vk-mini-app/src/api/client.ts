@@ -6,6 +6,8 @@ import {
   getStaticTeachers,
   getStaticMeta,
   getStaticDays,
+  loadStaticSchedule,
+  resetStaticScheduleCache,
 } from './staticSchedule';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -21,14 +23,27 @@ function isNetworkError(err: any): boolean {
   );
 }
 
-export async function fetchSchedule(group: string, date?: string): Promise<ScheduleResponse> {
+export async function fetchSchedule(
+  group: string,
+  date?: string,
+  forceRefresh?: boolean
+): Promise<ScheduleResponse> {
   const params = new URLSearchParams({ group });
   if (date) params.append('date', date);
+
+  const loadStaticFallback = async () => {
+    if (forceRefresh) {
+      resetStaticScheduleCache();
+      await loadStaticSchedule(true);
+    }
+    return await getStaticSchedule(group, date);
+  };
+
   try {
     const response = await fetch(`${BASE_URL}/api/schedule?${params.toString()}`);
     if (!response.ok) {
       if (!BASE_URL && response.status === 404) {
-        return await getStaticSchedule(group, date);
+        return await loadStaticFallback();
       }
       throw new Error(`Failed to load schedule: ${response.status}`);
     }
@@ -36,7 +51,7 @@ export async function fetchSchedule(group: string, date?: string): Promise<Sched
   } catch (err: any) {
     if (!BASE_URL && isNetworkError(err)) {
       try {
-        return await getStaticSchedule(group, date);
+        return await loadStaticFallback();
       } catch {
         // rethrow original error
       }
@@ -142,6 +157,19 @@ export async function fetchMeta(): Promise<MetaResponse> {
 }
 
 export async function fetchDays(): Promise<{ date: string; dayOfWeek: string }[]> {
+  if (BASE_URL) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/schedule`);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data?.days)) {
+          return data.days.map((d: any) => ({ date: d.date, dayOfWeek: d.dayOfWeek }));
+        }
+      }
+    } catch {
+      // fall back to static days
+    }
+  }
   try {
     return await getStaticDays();
   } catch {

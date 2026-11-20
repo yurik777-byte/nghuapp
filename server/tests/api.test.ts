@@ -174,8 +174,18 @@ describe('REST API Server & Data Aggregators', () => {
     });
 
     it('should compute occupancy status for given date and time', async () => {
-      // On 2026-09-04 at 09:30 (Pair 1: 09:00 - 10:35), Room 109 has Ж-11 Живопись
-      const res = await fetch(`${baseUrl}/api/rooms?date=2026-09-04&time=09:30`);
+      // On 2026-09-04, Ж-11 Живопись in Room 109 starts at 09:50 (row 1..3)
+      const freeRes = await fetch(`${baseUrl}/api/rooms?date=2026-09-04&time=09:30`);
+      assert.strictEqual(freeRes.status, 200);
+
+      const freeRooms = (await freeRes.json()) as any[];
+      const room109Free = freeRooms.find((r) => r.room === '109');
+      assert.ok(room109Free);
+      assert.strictEqual(room109Free.isOccupied, false);
+      assert.ok(room109Free.nextLesson);
+      assert.strictEqual(room109Free.nextLesson.timeStart, '09:50');
+
+      const res = await fetch(`${baseUrl}/api/rooms?date=2026-09-04&time=10:00`);
       assert.strictEqual(res.status, 200);
 
       const rooms = (await res.json()) as any[];
@@ -186,6 +196,8 @@ describe('REST API Server & Data Aggregators', () => {
       assert.strictEqual(room109.currentLesson.subject, 'Живопись');
       assert.strictEqual(room109.currentLesson.group, 'Ж-11');
       assert.strictEqual(room109.currentLesson.pairNumber, 1);
+      assert.strictEqual(room109.currentLesson.timeStart, '09:50');
+      assert.strictEqual(room109.currentLesson.timeEnd, '10:35');
       assert.ok(room109.nextLesson);
       assert.strictEqual(room109.nextLesson.pairNumber, 2);
     });
